@@ -1,3 +1,8 @@
+<?php
+//iniciando sessão
+session_start(); 
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,47 +14,93 @@
             font-family: Pokemon;
             src: url("fontes/PocketMonk-15ze.ttf");
         }
-        div.logo{
-            position: absolute;
-            top: -4vh;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;   /* cor do preenchimento do texto */
-            font-family: Pokemon; 
-            color: #FFDE00;
-            font-size: 3em;
-            -webkit-text-stroke-color: #3B4CCA;
-            -webkit-text-stroke-width: 0.15vh; /* cor da borda do texto */
+        @font-face {
+            font-family: Pixelitta;
+            src: url("fontes/Pixelitta-Regular.ttf");
+        }
+        body {
+            background-image: url("imagens/pokemart.jpg");
+            background-size: cover;
         }
         div.dinheiro{
             position: absolute;
             font-family: Helvetica;
             top: 13vh;
             left: 5%;
-            width:13%; 
-            background-color: rgba(232, 232, 232, 0.9); 
+            width: 12%; 
+            background-color: rgba(232, 232, 232, 0.95); 
             position: absolute; 
             margin: auto; 
-            height: 13%; 
-            border-radius: 3vh; 
+            height: 10%; 
+            border-radius: 2vh; 
             border: double;
         }
+
         h2.money{
             padding-left: 5%;
+            margin-top: 3%;
+        }
+
+        div.itens{
+            position: absolute;
+            font-family: Helvetica;
+            top: 13vh;
+            left: 30%;
+            width: 60%; 
+            background-color: rgba(232, 232, 232, 0.97); 
+            position: absolute; 
+            margin: auto; 
+            height: 80%; 
+            border-radius: 1vh; 
+            border: double;
+            overflow: scroll;
+        }
+        h1.item{
+            font-family: Pokemon; 
+            color: #FFDE00;
+            font-size: 5em;
+            -webkit-text-stroke-color: #3B4CCA;
+            -webkit-text-stroke-width: 0.15vh; /* cor da borda do texto */
+            display: flex;
+            text-align: center;
+            margin-top: 1%;
+            padding-left: 43%;
+        }
+        strong.pocao{
+            position: absolute;
+            top: 25%;
+            left: 10%;
+        }
+
+        strong.revive{
+            position: absolute;
+            top: 39%;
+            left: 10%;
+        }
+        
+        strong.restore{
+            position: absolute;
+             top: 53%; /* aparentemente aumenta de 14 em 14 e o texto fica de boa, no mesmo lugar */
+            left: 10%;
+        }
+
+        img{ 
+            padding-left: 1%;
         }
 
     </style>
 </head>
 <body>
-    <div class="logo"> <h1>Lojinha</h1> </div> <!-- colocar cores diferentes, tipo como é na logo do pokemon mesmo -->
+    <div class="dinheiro"> <h2 class="money">Dinheiro: <br> <p> $$$$<!-- pegar o valor do banco de dados aqui --></p> </h2> </div>  <!--Div Dinheiro -->
 
-    <div class="dinheiro"> <h2 class="money">Dinheiro: <br> $$$$$ <span> <!-- pegar o valor do banco de dados aqui --> </span> </h2> </div>
-
-    <div class="itens">
-        <h2>Itens</h2> <!-- quero fazer ser um negócio quadrado que vai pra baixo sem fazer a tela inteira mover -->
-        
+     <div class="itens"> <!--Div que mostra os itens -->
+        <h1 class="item">Lojinha</h1> <br> <!-- quero fazer ser um negócio quadrado que vai pra baixo sem fazer a tela inteira mover -->
+        <tr>
+            <td> <img src="imagens\item1.png" alt="poção que cura 20HP" height="100px" width="100px"> <strong class="pocao"> Uma poção que cura 20 pontos de vida do pokémon </strong> </td> <br>
+            <td> <img src="imagens/item2.png" alt="revive" height="100px" width="100px"> <strong class="revive"> Revive seu pokémon com aproximadamente 50% da vida total dele </strong> </td> <br>
+            <td> <img src="imagens\item3.png" alt="poção que cura 20HP" height="100px" width="100px"> <strong class="restore"> Poção que restaura toda vida do pokémon e cura todos seus status </strong> </td> <br>
+        </tr>
     </div>
-</form>
-</section>
+
 </body>
 </html>
