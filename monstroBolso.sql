@@ -7,13 +7,14 @@ use mBVV;
  * log(IDlog, idBatalha, Idtime1, Idtime2, Iduser1, Iduser2,texto)
  * slot(timeid, slotID, apiID, nome apelido, speed, atk, def, etc, img, EV, IV, genero, shiny, nivel, natureza, item, habilidade, move1, move2, move3, move4)
  * */
- 
+
+/*
 create table pokemon( /*Dados dados pela API, stats são os base*/
 idPokemon int auto_increment primary key,
 idApi int not null unique,
 nome varchar(50) not null unique,
 tipo1 varchar(20) not null,
-tipo2 varchar(20),
+tipo2 varchar(20), /*transformar em array?*/
 hp int not null CHECK (hp >= 0 AND hp <= 255),
 atk int not null CHECK (atk >= 0 AND atk <= 255),
 def int not null CHECK (def >= 0 AND def <= 255),
@@ -24,6 +25,7 @@ bst int not null unique CHECK (bst >= 0 and  bst <= 1530),
 img varchar(150) not null,
 habilidade varchar(40) not null
 );
+*/
 
 CREATE TABLE ataque(
 idAtaque int auto_increment primary key,
@@ -43,14 +45,14 @@ wins int DEFAULT 0,
 loss int DEFAULT 0,
 elo int DEFAULT 1000 CHECK (elo >= 1000),
 pontos int CHECK (pontos >= 0),
-dinheiro int CHECK (dinheiro >= 0)
+dinheiro int CHECK (dinheiro >= 0) /*fazer uma variável para os itens que o usuário possui*/
 );
 
 create table item(
 idItem int auto_increment primary key,
 nome varchar(40),
 descricao varchar(150),
-preco float
+preco int CHECK (preco >= 0)
 );
 
 CREATE TABLE batalha(
@@ -77,12 +79,14 @@ idTimes int FOREIGN KEY REFERENCES times(idTime),
 idApi int not null unique,
 nome varchar(30),
 apelido varchar(30),
+/*
 hp int not null CHECK (hp >= 0 AND hp <= 255),
 atk int not null CHECK (atk >= 0 AND atk <= 255),
 def int not null CHECK (def >= 0 AND def <= 255),
 spA int not null CHECK (spA  >= 0 AND spA <= 255),
 spD int not null CHECK (spD >= 0 AND spD <= 255),
 spe int not null CHECK (spe >= 0 AND spe <= 255),
+*/
 evHp int not null CHECK (evHp >= 0 AND evHp <= 252),
 evAtk int not null CHECK (evAtk >= 0 AND evAtk <= 252),
 evDef int not null CHECK (evDef >= 0 AND evDef <= 252),
@@ -97,7 +101,6 @@ ivSpD int not null CHECK (ivSpD >= 0 AND ivSpD <= 31),
 ivSpe int not null CHECK (ivSpe >= 0 AND ivSpe <= 31),
 genero varchar(1),
 shiny boolean,
-nivel int NOT NULL CHECK (nivel >=1 AND nivel <= 100),
 nat varchar(30) NOT NULL,
 item varchar(40),
 ability varchar(30) NOT NULL,
