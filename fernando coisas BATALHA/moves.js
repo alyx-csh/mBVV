@@ -1,0 +1,77 @@
+function usarMove(atacante, defensor, idMove){
+    const move = moves[idMove];
+
+    // Rola a chance de acertar
+    const hitroll = Math.random()*100;
+    if (hitroll > move.accuracy) {
+        return `${atacante.name} usou ${move.name}, mas errou!`;
+    }
+    
+    // Define se o ataque é físico ou especial, daí usa atk/def ou spA/spD
+    let a = atacante.atk;
+    let b = defensor.def;
+    if (move.category === "Special") {
+        a = atacante.spA;
+        b = defensor.spD;
+    }
+
+    const TipoEfetivo = {
+        "Normal": {"Rock": 0.5, "Ghost": 0.0, "Steel": 0.5},
+        "Fire": {"Fire": 0.5, "Water": 0.5, "Grass": 2.0, "Ice": 2.0, "Bug": 2.0, "Rock": 0.5, "Dragon": 0.5, "Steel": 2.0},
+        "Water": {"Fire": 2.0, "Water": 0.5, "Grass": 0.5, "Ground": 2.0, "Rock": 2.0, "Dragon": 0.5},
+        "Electric": {"Water": 2.0, "Electric": 0.5, "Grass": 0.5, "Ground": 0.0, "Flying": 2.0, "Dragon": 0.5},
+        "Grass": {"Fire": 0.5, "Water": 2.0, "Grass": 0.5, "Poison": 0.5, "Ground": 2.0, "Flying": 0.5, "Bug": 0.5, "Rock": 2.0, "Dragon": 0.5, "Steel": 0.5},
+        "Ice": {"Fire": 0.5, "Water": 0.5, "Grass": 2.0, "Ice": 0.5, "Ground": 2.0, "Flying": 2.0, "Dragon": 2.0, "Steel": 0.5},
+        "Fighting": {"Normal": 2.0, "Ice": 2.0, "Poison": 0.5, "Flying": 0.5, "Psychic": 0.5, "Bug": 0.5, "Rock": 2.0, "Ghost": 0.0, "Dark": 2.0, "Steel": 2.0, "Fairy": 0.5},
+        "Poison": {"Grass": 2.0, "Poison": 0.5, "Ground": 0.5, "Rock": 0.5, "Ghost": 0.5, "Steel": 0.0, "Fairy": 2.0},
+        "Ground": {"Fire": 2.0, "Electric": 2.0, "Grass": 0.5, "Poison": 2.0, "Flying": 0.0, "Bug": 0.5, "Rock": 2.0, "Steel": 2.0},
+        "Flying": {"Electric": 0.5, "Grass": 2.0, "Fighting": 2.0, "Bug": 2.0, "Rock": 0.5, "Steel": 0.5},
+        "Psychic": {"Fighting": 2.0, "Poison": 2.0, "Psychic": 0.5, "Dark": 0.0, "Steel": 0.5},
+        "Bug": {"Fire": 0.5, "Grass": 2.0, "Fighting": 0.5, "Poison": 0.5, "Flying": 0.5, "Psychic": 2.0, "Ghost": 0.5, "Dark": 2.0, "Steel": 0.5, "Fairy": 0.5},
+        "Rock": {"Fire": 2.0, "Ice": 2.0, "Fighting": 0.5, "Ground": 0.5, "Flying": 2.0, "Bug": 2.0, "Steel": 0.5},
+        "Ghost": {"Normal": 0.0, "Psychic": 0.5, "Ghost": 2.0, "Dark": 0.5},
+        "Dragon": {"Dragon": 2.0, "Steel": 0.5, "Fairy": 0.0},
+        "Dark": {"Fighting": 0.5, "Psychic": 2.0, "Ghost": 2.0, "Fairy": 0.5},
+        "Steel": {"Fire": 0.5, "Water": 0.5, "Electric": 0.5, "Ice": 2.0, "Rock": 2.0, "Steel": 0.5, "Fairy": 2.0},
+        "Fairy": {"Fire": 0.5, "Fighting": 2.0, "Poison": 0.5, "Dragon": 2.0, "Dark": 2.0, "Steel": 0.5}
+    };
+
+    // STAB
+    let STAB = 1.0;
+    const tiposAtacante = Array.isArray(atacante.type) ? atacante.type : [atacante.type];
+    if (tiposAtacante.includes(move.type)) {
+        STAB = 1.5;
+    }
+
+    // Efetividade contra tipos do defensor
+    const tiposDefensor = [];
+    if (Array.isArray(defensor.type)) {
+        tiposDefensor.push(...defensor.type);
+    } else if (defensor.type) {
+        tiposDefensor.push(defensor.type);
+    }
+    if (defensor.type2) {
+        tiposDefensor.push(defensor.type2);
+    }
+    if (defensor.tipo) {
+        tiposDefensor.push(defensor.tipo);
+    }
+    if (defensor.tipo2) {
+        tiposDefensor.push(defensor.tipo2);
+    }
+
+    let tipo = 1.0;
+    for (const tipoDefensor of tiposDefensor) {
+        if (tipoDefensor && TipoEfetivo[move.type]) {
+            tipo *= TipoEfetivo[move.type][tipoDefensor] ?? 1.0;
+        }
+    }
+
+    // Cálculo final de dano
+    const baseDmg = (((22 * move.power * a / b) / 50) + 2) * STAB * tipo * (Math.random() * 0.15 + 0.85);
+    const finalDmg = Math.floor(baseDmg);
+
+    defensor.hp = Math.max(0, defensor.hp - finalDmg);
+
+    return `${atacante.name} usou ${move.name} em ${defensor.name} e causou ${finalDmg} de dano!`;
+}
