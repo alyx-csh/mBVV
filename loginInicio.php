@@ -1,8 +1,6 @@
 <?php
 
-//iniciando sessão
-session_start(); ?>
-
+ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +31,7 @@ session_start(); ?>
 <body>
         <!-- div do formulário -->
         <div><h1 id=titulo>MonstroBolso</h1>
-             <form action="menu.php" method="post" enctype='multipart/form-data'>
+             <form action="processar.php" method="post" enctype='multipart/form-data'>
                     <label for="username" id="username">Nome de Usuário<br></label>
                     <input type="text" name="username" id="uninput"><br>
                     <label for="senha" id="senha">Senha<br></label>
