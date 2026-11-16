@@ -1,5 +1,5 @@
 <?php
-
+    //require_once 'config.php'; <- isso conecta com o banco de dados
  ?>
 <!DOCTYPE html>
 <html lang="en">

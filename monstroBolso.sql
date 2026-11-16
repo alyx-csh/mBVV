@@ -121,3 +121,18 @@ idSlot4 int FOREIGN KEY REFERENCES slot(idSlot),
 idSlot5 int FOREIGN KEY REFERENCES slot(idSlot),
 idSlot6 INt FOREIGN KEY REFERENCES slot(idSlot)
 );
+
+insert into item (nome, descricao, preco) values
+('Potion', 'Restaura 20 HP de um Pokémon.', 300),
+('Super Potion', 'Restaura 50 HP de um Pokémon.', 700),
+('Hyper Potion', 'Restaura 200 HP de um Pokémon.', 1200),
+('Max Potion', 'Restaura todos os HP de um Pokémon.', 2500),
+('Revive', 'Revive um Pokémon desmaiado com metade do HP máximo.', 1500),
+('Full Restore', 'Restaura todos os HP e cura qualquer condição de status.', 3000),
+('Antidote', 'Cura envenenamento de um Pokémon.', 100),
+('Paralyze Heal', 'Cura paralisia de um Pokémon.', 100),
+('Burn Heal', 'Cura queimadura de um Pokémon.', 100),
+('Ice Heal', 'Cura congelamento de um Pokémon.', 100),
+('Awakening', 'Desperta um Pokémon adormecido.', 100),
+('Full Heal', 'Cura qualquer condição de status de um Pokémon.', 500),
+('Pedra de evolução', 'Usada para evoluir qualquer Pokémon.', 5000);
