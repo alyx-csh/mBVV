@@ -44,7 +44,7 @@ dinheiro int CHECK (dinheiro >= 0)
 );
 
 create table item(
-idItem int auto_increment primary key CHECK (idItem <= 13),
+idItem int auto_increment primary key,
 nome varchar(40),
 descricao varchar(150),
 preco int CHECK (preco >= 0)
@@ -156,6 +156,3 @@ insert into item (nome, descricao, preco) values
 ('Awakening', 'Desperta um Pokémon adormecido.', 100),
 ('Full Heal', 'Cura qualquer condição de status de um Pokémon.', 500),
 ('Pedra de evolução', 'Usada para evoluir qualquer Pokémon.', 5000);
-
-insert into usuario (nome, senha, wins, loss, dinheiro) values
-('Ash', 'pikachu123', 0, 0, 10000)
