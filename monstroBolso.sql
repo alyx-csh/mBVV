@@ -6,15 +6,14 @@ use mBVV;
  * time(timeID, 6x idslot),
  * log(IDlog, idBatalha, Idtime1, Idtime2, Iduser1, Iduser2,texto)
  * slot(timeid, slotID, apiID, nome apelido, speed, atk, def, etc, img, EV, IV, genero, shiny, nivel, natureza, item, habilidade, move1, move2, move3, move4)
- * */
+ */
 
-/*
-create table pokemon( /*Dados dados pela API, stats são os base*/
+/* create table pokemon(
 idPokemon int auto_increment primary key,
 idApi int not null unique,
 nome varchar(50) not null unique,
 tipo1 varchar(20) not null,
-tipo2 varchar(20), /*transformar em array?*/
+tipo2 varchar(20), transformar em array?
 hp int not null CHECK (hp >= 0 AND hp <= 255),
 atk int not null CHECK (atk >= 0 AND atk <= 255),
 def int not null CHECK (def >= 0 AND def <= 255),
@@ -24,15 +23,22 @@ spe int not null CHECK (speed >= 0 AND speDef <= 255),
 bst int not null unique CHECK (bst >= 0 and  bst <= 1530),
 img varchar(150) not null,
 habilidade varchar(40) not null
-);
-*/
+); */
+
+DROP TABLE IF EXISTS log;
+DROP TABLE IF EXISTS batalha;
+DROP TABLE IF EXISTS slot;
+DROP TABLE IF EXISTS times;
+DROP TABLE IF EXISTS item;
+DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS ataque;
 
 CREATE TABLE ataque(
 idAtaque int auto_increment primary key,
 nome varchar(50) NOT  null,
 tipo varchar(30) NOT null,
 fisSpe boolean, /*0=físico e 1=especial, o que acham?*/
-poder int CHECK (poder >= 0 and poder <= 250) NOT null,
+poder int not null CHECK (poder >= 0 and poder <= 250),
 prioridade int DEFAULT 0 check (prioridade >= -7 and prioridade <= 7),
 pp int check (pp >= 1 and pp <= 40)
 );
@@ -55,28 +61,8 @@ descricao varchar(150),
 preco int CHECK (preco >= 0)
 );
 
-CREATE TABLE batalha(
-idBatalha int auto_increment primary key,
-idUser1 int foreign KEY REFERENCES usuario(idUsuario),
-idUser2 int foreign KEY REFERENCES usuario(idUsuario),
-idTimes1 int foreign KEY REFERENCES times(idTimes),
-idTimes2 foreign KEY REFERENCES times(idTimes)
-);
-
-create table log(
-idLog int auto_increment primary key,
-idBatalha int FOREIGN KEY REFERENCES batalha(idBatalha),
-idUser1 int foreign KEY REFERENCES usuario(idUsuario),
-idUser2 int foreign KEY REFERENCES usuario(idUsuario),
-idTimes1 int foreign KEY REFERENCES times(idTimes),
-idTimes2 foreign KEY REFERENCES times(idTimes),
-arquivo varchar(50)
-);
-
 create table slot(
 idSlot int auto_increment primary key,
-idTimes int FOREIGN KEY REFERENCES times(idTime),
-idApi int not null unique,
 nome varchar(30),
 apelido varchar(30),
 /*
@@ -114,12 +100,45 @@ img varchar(150) not null
 create table times(
 idTimes int auto_increment primary key,
 nome varchar(20),
-idSlot1 int FOREIGN KEY REFERENCES slot(idSlot),
-idSlot2 int FOREIGN KEY REFERENCES slot(idSlot),
-idSlot3 int FOREIGN KEY REFERENCES slot(idSlot),
-idSlot4 int FOREIGN KEY REFERENCES slot(idSlot),
-idSlot5 int FOREIGN KEY REFERENCES slot(idSlot),
-idSlot6 INt FOREIGN KEY REFERENCES slot(idSlot)
+idSlot1 int,
+idSlot2 int,
+idSlot3 int,
+idSlot4 int,
+idSlot5 int,
+idSlot6 INt,
+FOREIGN KEY (idSlot1) REFERENCES slot(idSlot),
+FOREIGN key (idSlot2) REFERENCES slot(idSlot),
+FOREIGN KEY (idSlot3) REFERENCES slot(idSlot),
+FOREIGN KEY (idSlot4) REFERENCES slot(idSlot),
+FOREIGN KEY (idSlot5) REFERENCES slot(idSlot),
+FOREIGN KEY (idSlot6) REFERENCES slot(idSlot)
+);
+
+CREATE TABLE batalha(
+idBatalha int auto_increment primary key,
+idUser1 int,
+idUser2 int,
+idTimes1 int,
+idTimes2 int,
+FOREIGN KEY (idUser1) REFERENCES usuario(idUsuario),
+FOREIGN KEY (idUser2) REFERENCES usuario(idUsuario),
+FOREIGN KEY (idTimes1) REFERENCES times(idTimes),
+FOREIGN KEY (idTimes2) REFERENCES times(idTimes)
+);
+
+create table log(
+idLog int auto_increment primary key,
+idBatalha int,
+idUser1 int,
+idUser2 int,
+idTimes1 int,
+idTimes2 int,
+arquivo varchar(50),
+FOREIGN KEY (idBatalha) REFERENCES batalha(idBatalha),
+FOREIGN KEY (idUser1) REFERENCES usuario(idUsuario),
+FOREIGN KEY (idUser2) REFERENCES usuario(idUsuario),
+FOREIGN KEY (idTimes1) REFERENCES times(idTimes),
+FOREIGN KEY (idTimes2) REFERENCES times(idTimes)
 );
 
 insert into item (nome, descricao, preco) values

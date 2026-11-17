@@ -1,7 +1,6 @@
 <?php
+require_once 'config.php';
 
-//alterando o nome da sessão
-session_name('MONSTROBOLSO');
 //iniciando sessão
 session_start();
 
@@ -15,6 +14,6 @@ if (isset($_SESSION['username'])) {
 if (isset($_SESSION['senha'])) {
     echo $_SESSION['senha'];
 } else {
-    echo "ERRO NOA SENHA!";
+    echo "ERRO NA SENHA!";
 }
 ?>
