@@ -1,67 +1,65 @@
 use mBVV;
 
-/*tabela para: pokemon(apiID,nome, tipo, hp, speed, atk, etc, img, habilidade), 
- * usuario(nome, senha,ID, pontos), 
- * item(id, nome,desc, preco), 
- * time(timeID, 6x idslot),
- * log(IDlog, idBatalha, Idtime1, Idtime2, Iduser1, Iduser2,texto)
- * slot(timeid, slotID, apiID, nome apelido, speed, atk, def, etc, img, EV, IV, genero, shiny, nivel, natureza, item, habilidade, move1, move2, move3, move4)
- */
-
-/* create table pokemon(
+/* create table pokemon( TABELA POKÉMON ATUALIZADA
 idPokemon int auto_increment primary key,
-idApi int not null unique,
 nome varchar(50) not null unique,
-tipo1 varchar(20) not null,
-tipo2 varchar(20), transformar em array?
+tipos varchar(50) not null,
+natureza varchar(30) not null,
 hp int not null CHECK (hp >= 0 AND hp <= 255),
 atk int not null CHECK (atk >= 0 AND atk <= 255),
 def int not null CHECK (def >= 0 AND def <= 255),
 spA int not null CHECK (speAtk  >= 0 AND speAtk <= 255),
 spD int not null CHECK (speDef >= 0 AND speDef <= 255),
 spe int not null CHECK (speed >= 0 AND speDef <= 255),
-bst int not null unique CHECK (bst >= 0 and  bst <= 1530),
-img varchar(150) not null,
-habilidade varchar(40) not null
+img varchar(150) not null
 ); */
 
 DROP TABLE IF EXISTS log;
 DROP TABLE IF EXISTS batalha;
-DROP TABLE IF EXISTS slot;
 DROP TABLE IF EXISTS times;
+DROP TABLE IF EXISTS inventario;
+DROP TABLE IF EXISTS slot;
+DROP TABLE IF EXISTS ataque;
 DROP TABLE IF EXISTS item;
 DROP TABLE IF EXISTS usuario;
-DROP TABLE IF EXISTS ataque;
 
 CREATE TABLE ataque(
 idAtaque int auto_increment primary key,
 nome varchar(50) NOT  null,
 tipo varchar(30) NOT null,
 fisSpe boolean, /*0=físico e 1=especial, o que acham?*/
-poder int not null CHECK (poder >= 0 and poder <= 250),
-prioridade int DEFAULT 0 check (prioridade >= -7 and prioridade <= 7),
-pp int check (pp >= 1 and pp <= 40)
+poder int not null,
+prioridade int default 0 check (prioridade >= -7 and prioridade <= 5),
+pp int check (pp >= 5 and pp <= 40)
 );
 
 create table usuario(
 idUsuario int auto_increment primary key,
 nome varchar(30) not null unique,
-senha varchar(35) not null unique,
+senha varchar(255) not null unique,
 wins int DEFAULT 0,
 loss int DEFAULT 0,
-elo int DEFAULT 1000 CHECK (elo >= 1000),
-pontos int CHECK (pontos >= 0),
-dinheiro int CHECK (dinheiro >= 0) /*fazer uma variável para os itens que o usuário possui*/
+/* elo int DEFAULT 1000 CHECK (elo >= 1000), acho melhor retirar, vou deixar comentado por enquanto*/
+dinheiro int CHECK (dinheiro >= 0)
 );
 
 create table item(
-idItem int auto_increment primary key,
+idItem int auto_increment primary key CHECK (idItem <= 13),
 nome varchar(40),
 descricao varchar(150),
 preco int CHECK (preco >= 0)
 );
 
-create table slot(
+create table inventario (
+idInventario int auto_increment primary key,
+idUsuario int not null,
+idItem int not null,
+quantidade int default 0 CHECK (quantidade >= 0),
+foreign key (idUsuario) references usuario(idUsuario),
+foreign key (idItem) references item(idItem)
+);
+
+create table slot( /*talvez isso vá virar a instancia de pokémon só colocando uma variável pra status*/
 idSlot int auto_increment primary key,
 nome varchar(30),
 apelido varchar(30),
@@ -100,18 +98,21 @@ img varchar(150) not null
 create table times(
 idTimes int auto_increment primary key,
 nome varchar(20),
-idSlot1 int,
+/* talvez a gente tenha que modificar isso e colocar o time primeiro,
+daí o pokémon só é instaciado depois de ser adicionado no time, pq se não não faz
+sentido eu acho */
+idSlot1 int, 
 idSlot2 int,
 idSlot3 int,
 idSlot4 int,
 idSlot5 int,
 idSlot6 INt,
-FOREIGN KEY (idSlot1) REFERENCES slot(idSlot),
-FOREIGN key (idSlot2) REFERENCES slot(idSlot),
-FOREIGN KEY (idSlot3) REFERENCES slot(idSlot),
-FOREIGN KEY (idSlot4) REFERENCES slot(idSlot),
-FOREIGN KEY (idSlot5) REFERENCES slot(idSlot),
-FOREIGN KEY (idSlot6) REFERENCES slot(idSlot)
+foreign key (idSlot1) references slot(idSlot),
+foreign key (idSlot2) references slot(idSlot),
+foreign key (idSlot3) references slot(idSlot),
+foreign key (idSlot4) references slot(idSlot),
+foreign key (idSlot5) references slot(idSlot),
+foreign key (idSlot6) references slot(idSlot)
 );
 
 CREATE TABLE batalha(
@@ -120,10 +121,10 @@ idUser1 int,
 idUser2 int,
 idTimes1 int,
 idTimes2 int,
-FOREIGN KEY (idUser1) REFERENCES usuario(idUsuario),
-FOREIGN KEY (idUser2) REFERENCES usuario(idUsuario),
-FOREIGN KEY (idTimes1) REFERENCES times(idTimes),
-FOREIGN KEY (idTimes2) REFERENCES times(idTimes)
+foreign key (idUser1) references usuario(idUsuario),
+foreign key (idUser2) references usuario(idUsuario),
+foreign key (idTimes1) references times(idTimes),
+foreign key (idTimes2) references times(idTimes)
 );
 
 create table log(
@@ -134,11 +135,11 @@ idUser2 int,
 idTimes1 int,
 idTimes2 int,
 arquivo varchar(50),
-FOREIGN KEY (idBatalha) REFERENCES batalha(idBatalha),
-FOREIGN KEY (idUser1) REFERENCES usuario(idUsuario),
-FOREIGN KEY (idUser2) REFERENCES usuario(idUsuario),
-FOREIGN KEY (idTimes1) REFERENCES times(idTimes),
-FOREIGN KEY (idTimes2) REFERENCES times(idTimes)
+foreign key (idBatalha) references batalha(idBatalha),
+foreign key (idUser1) references usuario(idUsuario),
+foreign key (idUser2) references usuario(idUsuario),
+foreign key (idTimes1) references times(idTimes),
+foreign key (idTimes2) references times(idTimes)
 );
 
 insert into item (nome, descricao, preco) values
@@ -155,3 +156,6 @@ insert into item (nome, descricao, preco) values
 ('Awakening', 'Desperta um Pokémon adormecido.', 100),
 ('Full Heal', 'Cura qualquer condição de status de um Pokémon.', 500),
 ('Pedra de evolução', 'Usada para evoluir qualquer Pokémon.', 5000);
+
+insert into usuario (nome, senha, wins, loss, dinheiro) values
+('Ash', 'pikachu123', 0, 0, 10000)
