@@ -45,14 +45,6 @@ function usarMove(atacante, defensor, idMove){
 
     // Efetividade contra tipos do defensor
     const tiposDefensor = [];
-    if (Array.isArray(defensor.type)) {
-        tiposDefensor.push(...defensor.type);
-    } else if (defensor.type) {
-        tiposDefensor.push(defensor.type);
-    }
-    if (defensor.type2) {
-        tiposDefensor.push(defensor.type2);
-    }
     if (defensor.tipo) {
         tiposDefensor.push(defensor.tipo);
     }

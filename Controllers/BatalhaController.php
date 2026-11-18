@@ -17,7 +17,7 @@ class BatalhaController {
             $timesBrutos = $timeModel->buscarTimesDoUsuario($_SESSION['idUsuario']);
 
             if (empty($timesBrutos)) {
-                throw new SemTimeException("Você precisa de um time para batalhar!");
+                throw new SemTimeException("Precisas de montar pelo menos um time antes de entrar na arena de batalha!");
             }
 
             $timesCompletos = [];
@@ -80,17 +80,14 @@ class BatalhaController {
         if (empty($slotIds)) return [];
 
         $placeholders = implode(',', array_fill(0, count($slotIds), '?'));
-        $stmtSlots = $this->db->prepare("SELECT * FROM slot WHERE idSlot IN ($placeholders)");
+        $stmtSlots = $this->db->prepare("
+            SELECT s.*, COALESCE(p.hp, s.hp) AS hpMax
+            FROM slot s
+            LEFT JOIN pokemon p ON s.idPokemon = p.idPokemon
+            WHERE s.idSlot IN ($placeholders)
+        ");
         $stmtSlots->execute(array_values($slotIds));
         $slots = $stmtSlots->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($slots as &$slot) {
-            // Guardamos o hpMax fixo e mantemos o 'hp' atual vindo diretamente do banco
-            if (!isset($slot['hpMax'])) {
-                // Se precisar calcular o teto máximo com base nos stats originais, podes manter uma coluna ou estimar
-                $slot['hpMax'] = $slot['hp'] > 0 ? max($slot['hp'], 100) : 100; 
-            }
-        }
 
         return [
             'idTimes' => $time['idTimes'],
@@ -158,12 +155,14 @@ class BatalhaController {
         $pkOpo = $input['oponente'] ?? [];
         $idSlotAtivo = $pkJog['idSlot'] ?? null;
 
-        if (intval($pkJog['hp']) <= 0) { //condição para caso o pokémon desmaie ele te notifica
+        if (intval($pkJog['hp']) <= 0) {
             echo json_encode([
                 'danoJogador' => 0,
                 'danoOponente' => 0,
-                'hpOponente' => $pkOpo['hp'],
+                'hpOponente' => intval($pkOpo['hp'] ?? 0),
                 'hpJogador' => 0,
+                'statusJogador' => $slotAtivo['status'],
+                'statusOponente' => $pkOpo['status'] ?? null,
                 'vitoria' => false,
                 'derrota' => true,
                 'mensagem' => "Seu pokémon desmaiou e não pode mais lutar!"
@@ -175,10 +174,6 @@ class BatalhaController {
         $danoJogador = 0;
         $danoOponente = 0;
         $logTurno = "";
-
-        $velocidadeJogador = intval($pkJog['spe'] ?? 100);
-        $velocidadeOponente = intval($pkOpo['spe'] ?? 100);
-        $jogadorAtacaPrimeiro = ($velocidadeJogador >= $velocidadeOponente);
 
         $calcularDano = function($atk, $def, $isTipo1) {
             $base = (($atk / max(1, $def)) * 22) + 2;
@@ -194,37 +189,37 @@ class BatalhaController {
             $danoJogador = $calcularDano($pkJog['atk'], $pkOpo['def'], $isTipo1);
             $hpOpoAtual = max(0, $hpOpoAtual - $danoJogador);
             
-            $logTurno .= "seu pokemon atacou o oponente e deu {$danoJogador} de dano ";
+            $logTurno .= "Usaste o ataque! Causaste {$danoJogador} de dano. ";
 
             if ($hpOpoAtual > 0) {
                 $atqOpoTipo1 = (rand(0, 1) == 1);
                 $danoOponente = $calcularDano($pkOpo['atk'], $pkJog['def'], $atqOpoTipo1);
                 $hpJogAtual = max(0, $hpJogAtual - $danoOponente);
-                $logTurno .= "o oponente atacou e causou {$danoOponente} de dano";
+                $logTurno .= "Oponente contra-atacou e causou {$danoOponente} de dano!";
             }
         } else {
             $atqOpoTipo1 = (rand(0, 1) == 1);
             $danoOponente = $calcularDano($pkOpo['atk'], $pkJog['def'], $atqOpoTipo1);
             $hpJogAtual = max(0, $hpJogAtual - $danoOponente);
             
-            $logTurno .= "o oponente atacou e causou {$danoOponente} de dano ";
+            $logTurno .= "O oponente foi mais rápido e causou {$danoOponente} de dano! ";
 
             if ($hpJogAtual > 0) {
                 $isTipo1 = ($tipoAtaque === 'ataque1');
                 $danoJogador = $calcularDano($pkJog['atk'], $pkOpo['def'], $isTipo1);
                 $hpOpoAtual = max(0, $hpOpoAtual - $danoJogador);
-                $logTurno .= "seu pokemon atacou o oponente e deu {$danoJogador} de dano";
+                $logTurno .= "Retaliação! Causaste {$danoJogador} de dano.";
             }
         }
 
-        // mudar o hp no php
+        // PERSISTIR O HP ATUAL NA TABELA SLOT A CADA TURNO
         if ($idSlotAtivo) {
             try {
                 $hpParaSalvar = max(0, $hpJogAtual);
                 $stmtSlot = $this->db->prepare("UPDATE slot SET hp = ? WHERE idSlot = ? AND idUsuario = ?");
                 $stmtSlot->execute([$hpParaSalvar, $idSlotAtivo, $_SESSION['idUsuario']]);
             } catch (PDOException $e) {
-                error_log("Erro transferir hp para o banco " . $e->getMessage());
+                error_log("Erro ao persistir HP do slot: " . $e->getMessage());
             }
         }
 
@@ -248,6 +243,8 @@ class BatalhaController {
             'danoOponente' => $danoOponente,
             'hpOponente' => $hpOpoAtual,
             'hpJogador' => $hpJogAtual,
+            'statusJogador' => $statusJogador,
+            'statusOponente' => $statusOponente,
             'vitoria' => $vitoria,
             'derrota' => $derrota,
             'mensagem' => $logTurno

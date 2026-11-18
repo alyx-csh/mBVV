@@ -99,7 +99,7 @@ class TeamController {
         $hpAtual = intval($slot['hp']);
         $hpMax = intval($slot['hpMax']);
         $statusAtual = trim($slot['status'] ?? '');
-        $statusLower = mb_strtolower($statusAtual);
+        $statusLower = explode(':', mb_strtolower($statusAtual))[0];
 
         // 1. REVIVE
         if ($nomeItem === 'Revive') {
