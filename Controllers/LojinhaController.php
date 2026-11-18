@@ -13,11 +13,13 @@ class LojinhaController
         $this->db = $db;
     }
 
-    public function index()
-    {
-        $idUsuario = $_SESSION['idUsuario'] ?? 1; // ID padrão de teste
-
-        // Instancia os models injetando a conexão $db
+        public function index() { //se usuário não estiver logado, é levado pro login
+        $idUsuario = $_SESSION['idUsuario'];
+        if (!isset($_SESSION['idUsuario'])) {
+            header("Location: index.php?action=login");
+            exit;
+        } else {
+            // instancia os models injetando a conexão $db
         $usuarioModel = new Usuario($this->db);
         $itemModel = new Item($this->db);
 
@@ -25,21 +27,22 @@ class LojinhaController
         $usuario = $usuarioModel->buscarPorId($idUsuario);
         $din = $usuario['dinheiro'] ?? 0;
 
-        // As variáveis $itens e $din ficam disponíveis pra view
+        // as variáveis $itens e $din ficam disponíveis pra view
         require_once "View/lojinha/lojinha.php";
-    }
-
+            }
+        }
+        
     public function comprar()
     {
         $idUsuario = $_SESSION['idUsuario'] ?? 1;
         $idItem = $_POST['idItem'] ?? null;
 
         if (!$idItem) {
-            header("Location: index.php");
+            header("Location: index.php=?inicio");
             exit;
         }
 
-        // Instancia os três models injetando a conexão $db
+        // instancia os models injetando a conexão $db
         $usuarioModel = new Usuario($this->db);
         $itemModel = new Item($this->db);
         $inventarioModel = new Inventario($this->db);

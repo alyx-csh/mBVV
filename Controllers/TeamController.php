@@ -21,7 +21,7 @@ class TeamController {
 
     // Valida se o nome do time foi preenchido
     if (empty($nomeTime)) {
-        $_SESSION['erro_time'] = "Por favor, dê um nome à equipa!";
+        $_SESSION['erro_time'] = "Dê um nome ao seu time antes de continuar";
         header("Location: index.php?action=montar_time");
         exit;
     }
@@ -29,7 +29,7 @@ class TeamController {
     $pokemonModel = new Pokemon($this->db);
     $slotsIds = [];
 
-    // Limita no máximo a 6 pokémons
+    // limita no máximo a 6 pokémons
     $pokemonsEscolhidos = array_slice($pokemonsEscolhidos, 0, 6);
 
     foreach ($pokemonsEscolhidos as $termo) {
@@ -87,7 +87,7 @@ class TeamController {
         $inventarioModel = new Inventario($this->db);
 
         $slot = $timeModel->buscarSlotDoUsuario($idSlot, $idUsuario);
-        $itemInv = $inventarioModel->buscarItemUsuario($idUsuario, $idItem);
+        $itemInv = $inventarioModel->listarPorUsuario2($idUsuario, $idItem);
 
         if (!$slot || !$itemInv) {
             $_SESSION['erro_uso_item'] = "Pokémon ou item não encontrado no inventário.";
@@ -159,12 +159,12 @@ class TeamController {
             ]);
 
             $inventarioModel->consumirItem($idUsuario, $idItem);
-            $_SESSION['sucesso_uso_item'] = "Parabéns! {$slot['nome']} evoluiu para {$pkEvoluido->getNome()}!";
+            $_SESSION['sucesso_uso_item'] = "Parabéns! seu {$slot['nome']} evoluiu para {$pkEvoluido->getNome()}!";
             header("Location: index.php?action=meus_times");
             exit;
         }
 
-        // Os demais itens exigem que o Pokémon esteja vivo
+        // demais itens exigem que o Pokémon esteja vivo, logo o if abaixo
         if ($hpAtual <= 0) {
             $_SESSION['erro_uso_item'] = "{$slot['nome']} está desmaiado! Use um Revive primeiro.";
             header("Location: index.php?action=meus_times");
@@ -254,5 +254,4 @@ class TeamController {
         header("Location: index.php?action=meus_times");
         exit;
     }
-
 }

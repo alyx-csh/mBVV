@@ -10,7 +10,7 @@
             src: url("fontes/PocketMonk-15ze.ttf");
         }
         body {
-            background-image: url("imagens/montarTime.png");
+            background-image: url("imagens/meusTimes.webp");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;

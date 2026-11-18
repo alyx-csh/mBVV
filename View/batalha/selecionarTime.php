@@ -5,7 +5,7 @@
     <title>Selecionar Time - MonstroBolso</title>
     <style>
         body {
-            background-image: url("imagens/fundo.png");
+            background-image: url("imagens/montarTime.png");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -105,7 +105,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Escolha o seu Time para Batalhar</h1>
+        <h1>Escolha com qual time batalhar</h1>
 
         <div class="grid-times">
             <?php foreach ($timesCompletos as $time): ?>
@@ -129,7 +129,7 @@
         </div>
 
         <div class="voltar">
-            <a href="index.php?action=inicio">⬅ Voltar ao Menu Principal</a>
+            <a href="index.php?action=inicio">Voltar ao Menu Principal</a>
         </div>
     </div>
 </body>

@@ -24,7 +24,7 @@ class LoginController {
     $usuario = $usuarioModel->buscarPorNome($nome);
 
     if ($usuario) {
-        // Usuário existe: valida a senha
+        // se usuário existe checa a senha para ver se confere
         if (password_verify($senha, $usuario['senha'])) {
             $_SESSION['idUsuario'] = $usuario['idUsuario'];
             $_SESSION['nomeUsuario'] = $usuario['nome'];
@@ -36,10 +36,10 @@ class LoginController {
             exit;
         }
     } else {
-            // Usuário não existe: cadastra automaticamente e loga
+            // se suário não existe cria um login automaticamente 
             $usuarioModel->cadastrar($nome, $senha);
             
-            // Busca o recém-criado para pegar o ID e logar
+            // busca o novo usário para pegar seu id e logar
             $novoUsuario = $usuarioModel->buscarPorNome($nome);
             $_SESSION['idUsuario'] = $novoUsuario['idUsuario'];
             $_SESSION['nomeUsuario'] = $novoUsuario['nome'];
@@ -48,7 +48,7 @@ class LoginController {
             exit;
         }
     }
-    public function logout() {
+    public function logout() { //acaba com a sessão e desloga o player
         session_destroy();
         header("Location: index.php?action=login");
         exit;

@@ -5,7 +5,7 @@
     <title>Arena de Batalha - MonstroBolso</title>
     <style>
         body {
-            background-image: url("imagens/fundo.png");
+            background-image: url("imagens/batalha.png");
             background-size: cover;
             background-attachment: fixed;
             font-family: Helvetica, sans-serif;
@@ -38,7 +38,7 @@
         .botoes-ataque { display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
         button { background: #FFDE00; color: #3B4CCA; border: 2px solid #3B4CCA; padding: 10px 20px; font-weight: bold; border-radius: 8px; cursor: pointer; }
         button:hover { background: #fbc531; }
-        .lista-equipa { margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .lista-equipe { margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .btn-troca { background: #4cd137; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
         .btn-troca:disabled { background: #7f8c8d; cursor: not-allowed; }
     </style>
@@ -69,7 +69,7 @@
 
             <!-- Jogador Ativo (Carrega o HP atual vindo do banco no slot) -->
             <div class="combatente">
-                <h3 id="nome-pk-ativo"><?php echo htmlspecialchars($pokemonAtivo['nome']); ?> (Tipo: <?php echo $pokemonAtivo['tipo1']; ?>)</h3>
+                <h3 id="nome-pk-ativo"><?php echo htmlspecialchars($pokemonAtivo['nome']); ?> </h3>
                 <p>HP: <span id="hp-jog-atual"><?php echo $pokemonAtivo['hp']; ?></span> / <span id="hp-jog-max"><?php echo $pokemonAtivo['hpMax']; ?></span></p>
                 <img id="img-pk-ativo" src="<?php echo $pokemonAtivo['img']; ?>" alt="Jogador">
             </div>
@@ -87,7 +87,7 @@
             </div>
 
             <?php if (count($pokemons) > 1): ?>
-                <div class="lista-equipa">
+                <div class="lista-equipe">
                     <p style="width: 100%; margin: 5px 0;"><strong>Trocar Pokémon:</strong></p>
                     <?php foreach ($pokemons as $index => $pk): ?>
                         <button class="btn-troca" <?php echo ($pk['hp'] <= 0) ? 'disabled' : ''; ?> onclick="trocarPokemon(<?php echo $pk['idSlot']; ?>, '<?php echo addslashes($pk['nome']); ?>', <?php echo $pk['hp']; ?>, <?php echo $pk['hpMax']; ?>, '<?php echo $pk['img']; ?>', '<?php echo $pk['ataque1']; ?>', '<?php echo $pk['ataque2']; ?>', '<?php echo $pk['tipo1']; ?>', <?php echo $pk['atk']; ?>, <?php echo $pk['def']; ?>, <?php echo $pk['spe']; ?>)">
@@ -100,11 +100,11 @@
 
         <?php endif; ?>
 
-        <p style="text-align: center; margin-top: 20px;"><a href="index.php?action=inicio">⬅ Voltar ao Menu</a></p>
+        <p style="text-align: center; margin-top: 20px;"><a href="index.php?action=inicio">Correr</a></p>
     </div>
 
     <script>
-        // Objeto em JS contendo o idSlot para rastrear e atualizar o HP no banco
+        // pegando em js o idSlot atualizar o hp no banco
         let pokemonAtivo = {
             idSlot: <?php echo $pokemonAtivo['idSlot'] ?? 0; ?>,
             atk: <?php echo $pokemonAtivo['atk'] ?? 100; ?>,
@@ -112,17 +112,17 @@
             spe: <?php echo $pokemonAtivo['spe'] ?? 100; ?>,
             hp: <?php echo $pokemonAtivo['hp'] ?? 150; ?>
         };
-
+        // mesma coisa mas pro oponente
         let oponente = {
             atk: <?php echo $oponente['atk']; ?>,
             def: <?php echo $oponente['def']; ?>,
             spe: <?php echo $oponente['spe']; ?>,
             hp: <?php echo $oponente['hp']; ?>
         };
-
+        //função assincrona para o ataque dar dano
         async function executarAto(tipoAtaque, nomeAtaque) {
             if (pokemonAtivo.hp <= 0) {
-                document.getElementById('log-batalha').innerText = "Seu pokémon desmaiou e não pode mais lutar!";
+                document.getElementById('log-batalha').innerText = "pokémon desmaiado e incapaz de lutar!";
                 return;
             }
 
@@ -169,28 +169,29 @@
                 document.getElementById('log-batalha').innerText = "Ocorreu um erro de conexão ao processar o turno.";
             }
         }
-
+        
+        // função pra trocar de pokemon
         function trocarPokemon(idSlot, nome, hp, hpMax, img, atq1, atq2, tipo1, atkStat, defStat, speStat) {
             if (hp <= 0) {
                 alert("Pokémon desmaiado e não pode entrar em batalha");
                 return;
             }
 
-            // Atualiza os dados do Pokémon ativo
+            // atualiza os dados do Pokémon ativo
             pokemonAtivo.idSlot = idSlot;
             pokemonAtivo.atk = atkStat;
             pokemonAtivo.def = defStat;
             pokemonAtivo.spe = speStat;
             pokemonAtivo.hp = hp;
 
-            // Atualiza a interface visual (Nome, HP, Imagem)
+            // atualiza a GUI
             document.getElementById('nome-pk-ativo').innerText = `${nome} (Tipo: ${tipo1})`;
             document.getElementById('hp-jog-atual').innerText = hp;
             document.getElementById('hp-jog-max').innerText = hpMax;
             document.getElementById('img-pk-ativo').src = img;
             document.getElementById('log-batalha').innerText = `Enviou ${nome}!`;
 
-            // ATUALIZA OS BOTÕES DE ATAQUE COM OS GOLPES DO NOVO POKÉMON
+            // atualiza os ataques do pokemon
             const btn1 = document.getElementById('btn-ataque1');
             const btn2 = document.getElementById('btn-ataque2');
 
@@ -200,7 +201,7 @@
             btn2.innerText = atq2;
             btn2.setAttribute("onclick", `executarAto('ataque2', '${atq2}')`);
         }
-
+        //desativa os botões de ataque para quando o pokémon morre
         function desativarBotoesAtaque() {
             const botoes = document.querySelectorAll('.botoes-ataque button, .btn-troca');
             botoes.forEach(btn => btn.disabled = true);
