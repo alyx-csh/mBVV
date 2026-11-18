@@ -100,7 +100,6 @@
 
         <?php endif; ?>
 
-        <p style="text-align: center; margin-top: 20px;"><a href="index.php?action=inicio">Correr</a></p>
     </div>
 
     <script>

@@ -235,10 +235,12 @@ class BatalhaController {
             $stmt = $this->db->prepare("UPDATE usuario SET dinheiro = dinheiro + 500, wins = wins + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " você derrotou o pokémon adversário e ganhou 500PkD$!";
+            $this->CriarLog("VITÓRIA");
         } elseif ($derrota) {
             $stmt = $this->db->prepare("UPDATE usuario SET loss = loss + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " seu pokémon desmaiou!";
+            $this->CriarLog("DERROTA");
         }
 
         echo json_encode([
@@ -252,4 +254,15 @@ class BatalhaController {
         ]);
         exit;
     }
+
+    public function CriarLog($resultadoBatalha) {
+
+            $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
+
+            $arquivoLog = $diretorioLog . 'logBatalha.txt';
+            $dataHora = date("Y-m-d H:i:s");
+            $entradaLog = "[$dataHora] - LOG DE BATALHA = $resultadoBatalha" . PHP_EOL;
+
+            file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
+            }
 }
