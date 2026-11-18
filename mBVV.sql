@@ -40,7 +40,8 @@ nome varchar(30) not null unique,
 senha varchar(255) not null,
 wins int DEFAULT 0,
 loss int DEFAULT 0,
-dinheiro int CHECK (dinheiro >= 0)
+dinheiro int CHECK (dinheiro >= 0),
+img varchar(255) not null
 );
 
 create table item(
