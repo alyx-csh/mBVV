@@ -99,7 +99,7 @@ $nome = $usuario['nome'];
         <a href="index.php?action=batalha" class="btn-opcao">Batalhar</a>
 
         <!-- montar  -->
-        <a href="index.php?action=equipe" class="btn-opcao">Montar time</a>
+        <a href="index.php?action=montar_time" class="btn-opcao">Montar time</a>
     </div>
 
     <div class="troca-login">
