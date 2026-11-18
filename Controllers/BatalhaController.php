@@ -60,7 +60,8 @@ class BatalhaController {
             header("Location: index.php?action=batalha");
             exit;
         }
-
+        $inventarioModel = new Inventario($this->db);
+        $itensUsuario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
         $oponente = $this->gerarOponenteAleatorio();
         require_once __DIR__ . '/../View/batalha/arena.php';
     }
@@ -155,14 +156,18 @@ class BatalhaController {
         $pkOpo = $input['oponente'] ?? [];
         $idSlotAtivo = $pkJog['idSlot'] ?? null;
 
+        $statusJogador = $pkJog['status'] ?? null;
+        $statusOponente = $pkOpo['status'] ?? null;
+        $jogadorAtacaPrimeiro = (intval($pkJog['spe'] ?? 0) >= intval($pkOpo['spe'] ?? 0));
+
         if (intval($pkJog['hp']) <= 0) {
             echo json_encode([
                 'danoJogador' => 0,
                 'danoOponente' => 0,
                 'hpOponente' => intval($pkOpo['hp'] ?? 0),
                 'hpJogador' => 0,
-                'statusJogador' => $slotAtivo['status'],
-                'statusOponente' => $pkOpo['status'] ?? null,
+                'statusJogador' => $statusJogador,
+                'statusOponente' => $statusOponente,
                 'vitoria' => false,
                 'derrota' => true,
                 'mensagem' => "Seu pokémon desmaiou e não pode mais lutar!"
@@ -254,12 +259,12 @@ class BatalhaController {
 
     public function CriarLog($resultadoBatalha) {
 
-            $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
+        $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
 
-            $arquivoLog = $diretorioLog . 'logBatalha.txt';
-            $dataHora = date("Y-m-d H:i:s");
-            $entradaLog = "[$dataHora] - LOG DE BATALHA = $resultadoBatalha" . PHP_EOL;
+        $arquivoLog = $diretorioLog . 'logBatalha.txt';
+        $dataHora = date("Y-m-d H:i:s");
+        $entradaLog = "[$dataHora] - LOG DE BATALHA = $resultadoBatalha" . PHP_EOL;
 
-            file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
-            }
+        file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
+    }
 }

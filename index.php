@@ -5,6 +5,7 @@ require_once 'autoload.php';
 
 $action = $_GET['action'] ?? 'inicio';
 
+$batalhaController = new BatalhaController($db);
 $authController = new LoginController($db);
 $lojaController = new LojinhaController($db);
 $teamController = new TeamController($db);
@@ -69,17 +70,14 @@ try {
         break;
 
         case 'batalha':
-        $batalhaController = new BatalhaController($db);
         $batalhaController->index(); // abrir a tela para escolher entre times
         break;
 
         case 'arena':
-        $batalhaController = new BatalhaController($db);
         $batalhaController->arena(); // abrir a tela de batalha
         break;
 
         case 'processar_turno':
-        $batalhaController = new BatalhaController($db);
         $batalhaController->processarTurno(); // processa o turno, faz os calculos
         break;
 

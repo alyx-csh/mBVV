@@ -48,8 +48,7 @@
         <h1>Tá na hora do Vamo Ve!</h1>
 
         <?php 
-            $inventarioModel = new Inventario($db);
-            $inventario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
+            $inventario = $itensUsuario ?? [];
             $itensDeStatus = ['Antidote', 'Paralyze Heal', 'Burn Heal', 'Ice Heal', 'Awakening', 'Full Heal', 'Full Restore'];
             $pokemons = $timeAtual['pokemons'] ?? [];
             $ativoIndex = 0; 
@@ -94,7 +93,7 @@
             <div style="margin-top: 15px;">
                 <label for="item-batalha">Usar item:</label>
                 <select id="item-batalha">
-                    <option value="">Selecione um item de cura</option>
+                    <option value="">Selecione um item de status</option>
                     <?php foreach ($inventario as $item): ?>
                         <?php if (in_array($item['nome'], $itensDeStatus)): ?>
                             <option value="<?php echo $item['idItem']; ?>">
