@@ -4,6 +4,10 @@ if (!isset($_SESSION['idUsuario'])) {
     header("Location: index.php?action=login");
     exit;
 }
+
+$usuarioModel = new Usuario($db);
+$usuario = $usuarioModel->buscarPorId($_SESSION['idUsuario']);
+$nome = $usuario['nome'];
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -62,6 +66,24 @@ if (!isset($_SESSION['idUsuario'])) {
         background-color: #e5c800;
         transform: scale(1.05);
         }
+        .troca-login{
+        background: rgba(232, 232, 232, 0.95);
+        margin: 0 auto;
+        border-radius: 15px;
+        border: 4px double #3B4CCA;
+        width: 200px;
+        padding: 2vh;
+        position: absolute;
+        left: 86.8%;
+        top: 0%;
+        height: 6vh;
+        }
+        .nome-login {
+        color: #000000;
+        font-size: 2.4vh;
+        position: absolute;
+        top: -2vh;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +100,11 @@ if (!isset($_SESSION['idUsuario'])) {
 
         <!-- montar  -->
         <a href="index.php?action=equipe" class="btn-opcao">Montar time</a>
+    </div>
+
+    <div class="troca-login">
+        <b><p class="nome-login"><?php echo $nome; ?></p></b>
+        <a href="index.php?action=logout" class="btn-opcao">Mudar Login</a>
     </div>
 
 </body>
