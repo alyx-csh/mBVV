@@ -3,7 +3,6 @@ class PokemonEntity {
     private $nome;
     private $tipo1;
     private $tipo2;
-    // REMOVIDO: private $natureza;
     private $hp;
     private $atk;
     private $def;
@@ -14,7 +13,6 @@ class PokemonEntity {
     private $ataque2;
     private $img;
 
-    // Atualiza o construtor sem o parâmetro natureza
     public function __construct($dadosApi) {
         $this->nome = ucfirst($dadosApi['name']);
         $this->tipo1 = ucfirst($dadosApi['types'][0]['type']['name']);
@@ -35,12 +33,13 @@ class PokemonEntity {
         $this->spD = $calcStat($dadosApi['stats'][4]['base_stat']);
         $this->spe = $calcStat($dadosApi['stats'][5]['base_stat']);
 
-        $this->ataque1 = isset($dadosApi['moves'][0]['move']['name']) ? ucfirst($dadosApi['moves'][0]['move']['name']) : 'Tackle';
-        $this->ataque2 = isset($dadosApi['moves'][1]['move']['name']) ? ucfirst($dadosApi['moves'][1]['move']['name']) : 'Scratch';
+        // Atribuição dos ataques: Ataque 1 baseado no tipo1 do Pokémon via PokéAPI, Ataque 2 normal (Tackle)
+        $this->ataque1 = PokeApiService::buscarAtaquePorTipo($this->tipo1);
+        $this->ataque2 = "Tackle";
+
         $this->img = $dadosApi['sprites']['front_default'] ?? '';
     }
 
-    // Getters (mantém todos, exceto o getNatureza)
     public function getNome() { return $this->nome; }
     public function getTipo1() { return $this->tipo1; }
     public function getTipo2() { return $this->tipo2; }

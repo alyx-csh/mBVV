@@ -13,7 +13,7 @@ $teamController = new TeamController($db);
 if ($action === 'login' || $action === 'autenticar') {
     switch ($action) {
         case 'login':
-            $authController->telaLogin(); // <--- ISTO FALTAVA! Chama a view de login
+            $authController->telaLogin();
             break;
             
         case 'autenticar':
@@ -36,44 +36,60 @@ try {
         require_once __DIR__ . '/View/inicio.php';
         break;
 
-    case 'loja':
-    $lojaController->index();
-    break;
+        case 'loja':
+        $lojaController->index();
+        break;
 
-    case 'comprar':
-    $lojaController->comprar();
-    break;
+        case 'comprar':
+        $lojaController->comprar();
+        break;
 
-    case 'logout':
-    $authController->logout(); // Destrói a sessão e manda para o login
-    break;
+        case 'logout':
+        $authController->logout(); // Destrói a sessão e manda para o login
+        break;
 
-    case 'montar_time':
-    $teamController->telaMontarTime();
-    break;
+        case 'montar_time':
+        $teamController->index(); 
+        break;
 
-    case 'salvar_time':
-    $teamController->salvarTime();
-    break;
+        case 'novo_time':
+        $teamController->telaMontarTime();
+        break;
 
-    case 'batalha': // Exemplo de página protegida que exige time
-            // $batalhaController->index();
-            
-            // Simulação da verificação direto no index ou via controller:
-            $timeModel = new Time($db);
-            if ($timeModel->contarTimesDoUsuario($_SESSION['idUsuario']) === 0) {
-                throw new SemTimeException("Atenção: Monte pelo menos um time antes de ir para a batalha!");
-            }
-            require_once __DIR__ . '/View/batalha/arena.php';
-            break;
+        case 'salvar_time':
+        $teamController->salvarTime();
+        break;
 
-    default:
-    echo "Página não encontrada!";
-    break;
+        case 'meus_times':
+        $teamController->verTimes(); // Tela de ver times e usar itens
+        break;
+
+        case 'usar_item':
+        $teamController->usarItem(); // Ação POST para aplicar o item
+        break;
+
+        case 'batalha':
+        $batalhaController = new BatalhaController($db);
+        $batalhaController->index(); // Abre a seleção de times
+        break;
+
+        case 'arena':
+        $batalhaController = new BatalhaController($db);
+        $batalhaController->arena(); // Abre a arena com o time escolhido
+        break;
+
+        case 'processar_turno':
+        $batalhaController = new BatalhaController($db);
+        $batalhaController->processarTurno();
+        break;
+
+        default:
+        echo "Página não encontrada!";
+        break;
     }
 } catch (SemTimeException $e) {
     // Captura a nossa exceção customizada, guarda a mensagem na sessão e redireciona
     $_SESSION['erro_time'] = $e->getMessage();
-    header("Location: index.php?action=montar_time");
+    header("Location: index.php?action=novo_time");
     exit;
 }
