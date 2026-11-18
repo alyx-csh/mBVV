@@ -5,7 +5,7 @@
     <title>Selecionar Time - MonstroBolso</title>
     <style>
         body {
-            background-image: url("imagens/montarTime.png");
+            background-image: url("imagens/menuBatalha.png");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
