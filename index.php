@@ -83,6 +83,11 @@ try {
         $batalhaController->processarTurno();
         break;
 
+        case 'usar_item_batalha':
+        $batalhaController = new BatalhaController($db);
+        $batalhaController->usarItemBatalha();
+        break;
+
         default:
         echo "Página não encontrada!";
         break;

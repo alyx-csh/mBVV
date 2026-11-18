@@ -48,6 +48,9 @@
         <h1>Tá na hora do Vamo Ve!</h1>
 
         <?php 
+            $inventarioModel = new Inventario($db);
+            $inventario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
+            $itensDeStatus = ['Antidote', 'Paralyze Heal', 'Burn Heal', 'Ice Heal', 'Awakening', 'Full Heal', 'Full Restore'];
             $pokemons = $timeAtual['pokemons'] ?? [];
             $ativoIndex = 0; 
             $pokemonAtivo = $pokemons[$ativoIndex] ?? null;
@@ -62,6 +65,7 @@
             <div class="combatente">
                 <h3><?php echo htmlspecialchars($oponente['nome']); ?></h3>
                 <p>HP: <span id="hp-opo-atual"><?php echo $oponente['hp']; ?></span> / <span id="hp-opo-max"><?php echo $oponente['hpMax']; ?></span></p>
+                <p>Status: <span id="status-oponente">Saudável</span></p>
                 <img src="<?php echo $oponente['img']; ?>" alt="Oponente">
             </div>
 
@@ -71,6 +75,7 @@
             <div class="combatente">
                 <h3 id="nome-pk-ativo"><?php echo htmlspecialchars($pokemonAtivo['nome']); ?> (Tipo: <?php echo $pokemonAtivo['tipo1']; ?>)</h3>
                 <p>HP: <span id="hp-jog-atual"><?php echo $pokemonAtivo['hp']; ?></span> / <span id="hp-jog-max"><?php echo $pokemonAtivo['hpMax']; ?></span></p>
+                <p>Status: <span id="status-jogador"><?php echo htmlspecialchars($pokemonAtivo['status'] ?: 'Saudável'); ?></span></p>
                 <img id="img-pk-ativo" src="<?php echo $pokemonAtivo['img']; ?>" alt="Jogador">
             </div>
         </div>
@@ -86,11 +91,42 @@
                 </button>
             </div>
 
+            <div style="margin-top: 15px;">
+                <label for="item-batalha">Usar item:</label>
+                <select id="item-batalha">
+                    <option value="">Selecione um item de cura</option>
+                    <?php foreach ($inventario as $item): ?>
+                        <?php if (in_array($item['nome'], $itensDeStatus)): ?>
+                            <option value="<?php echo $item['idItem']; ?>">
+                                <?php echo htmlspecialchars($item['nome']); ?> (x<?php echo $item['quantidade']; ?>)
+                            </option>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+                <button type="button" onclick="usarItemBatalha()">Usar item no Pokémon ativo</button>
+            </div>
+
             <?php if (count($pokemons) > 1): ?>
                 <div class="lista-equipa">
                     <p style="width: 100%; margin: 5px 0;"><strong>Trocar Pokémon:</strong></p>
                     <?php foreach ($pokemons as $index => $pk): ?>
-                        <button class="btn-troca" <?php echo ($pk['hp'] <= 0) ? 'disabled' : ''; ?> onclick="trocarPokemon(<?php echo $pk['idSlot']; ?>, '<?php echo addslashes($pk['nome']); ?>', <?php echo $pk['hp']; ?>, <?php echo $pk['hpMax']; ?>, '<?php echo $pk['img']; ?>', '<?php echo $pk['ataque1']; ?>', '<?php echo $pk['ataque2']; ?>', '<?php echo $pk['tipo1']; ?>', <?php echo $pk['atk']; ?>, <?php echo $pk['def']; ?>, <?php echo $pk['spe']; ?>)">
+                        <button
+                            id="troca-<?php echo $pk['idSlot']; ?>"
+                            class="btn-troca"
+                            data-id-slot="<?php echo $pk['idSlot']; ?>"
+                            data-nome="<?php echo htmlspecialchars($pk['nome'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-hp="<?php echo $pk['hp']; ?>"
+                            data-hp-max="<?php echo $pk['hpMax']; ?>"
+                            data-img="<?php echo htmlspecialchars($pk['img'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-ataque1="<?php echo htmlspecialchars($pk['ataque1'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-ataque2="<?php echo htmlspecialchars($pk['ataque2'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-tipo1="<?php echo htmlspecialchars($pk['tipo1'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-atk="<?php echo $pk['atk']; ?>"
+                            data-def="<?php echo $pk['def']; ?>"
+                            data-spe="<?php echo $pk['spe']; ?>"
+                            data-status="<?php echo htmlspecialchars($pk['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                            <?php echo ($pk['hp'] <= 0) ? 'disabled' : ''; ?>
+                            onclick="trocarPokemon(this)">
                             <?php echo htmlspecialchars($pk['nome']); ?> (HP: <?php echo $pk['hp']; ?>)
                         </button>
                     <?php endforeach; ?>
@@ -110,14 +146,20 @@
             atk: <?php echo $pokemonAtivo['atk'] ?? 100; ?>,
             def: <?php echo $pokemonAtivo['def'] ?? 100; ?>,
             spe: <?php echo $pokemonAtivo['spe'] ?? 100; ?>,
-            hp: <?php echo $pokemonAtivo['hp'] ?? 150; ?>
+            hp: <?php echo $pokemonAtivo['hp'] ?? 150; ?>,
+            hpMax: <?php echo $pokemonAtivo['hpMax'] ?? 150; ?>,
+            status: <?php echo json_encode($pokemonAtivo['status'] ?? null); ?>,
+            tipo1: <?php echo json_encode($pokemonAtivo['tipo1'] ?? 'Normal'); ?>
         };
 
         let oponente = {
             atk: <?php echo $oponente['atk']; ?>,
             def: <?php echo $oponente['def']; ?>,
             spe: <?php echo $oponente['spe']; ?>,
-            hp: <?php echo $oponente['hp']; ?>
+            hp: <?php echo $oponente['hp']; ?>,
+            hpMax: <?php echo $oponente['hpMax']; ?>,
+            status: null,
+            tipo1: <?php echo json_encode($oponente['tipo1']); ?>
         };
 
         async function executarAto(tipoAtaque, nomeAtaque) {
@@ -148,6 +190,10 @@
                 
                 oponente.hp = data.hpOponente;
                 pokemonAtivo.hp = data.hpJogador;
+                oponente.status = data.statusOponente;
+                pokemonAtivo.status = data.statusJogador;
+                document.getElementById('status-oponente').innerText = statusLegivel(oponente.status);
+                document.getElementById('status-jogador').innerText = statusLegivel(pokemonAtivo.status);
 
                 document.getElementById('log-batalha').innerText = data.mensagem;
 
@@ -170,7 +216,77 @@
             }
         }
 
-        function trocarPokemon(idSlot, nome, hp, hpMax, img, atq1, atq2, tipo1, atkStat, defStat, speStat) {
+        async function usarItemBatalha() {
+            const seletor = document.getElementById('item-batalha');
+            if (!seletor.value) {
+                document.getElementById('log-batalha').innerText = "Selecione um item.";
+                return;
+            }
+
+            try {
+                const resposta = await fetch('index.php?action=usar_item_batalha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idSlot: pokemonAtivo.idSlot, idItem: seletor.value })
+                });
+                const data = await resposta.json();
+                if (!resposta.ok) {
+                    throw new Error(data.mensagem || "Não foi possível usar o item.");
+                }
+
+                pokemonAtivo.hp = data.hp;
+                pokemonAtivo.status = data.status;
+                document.getElementById('hp-jog-atual').innerText = data.hp;
+                document.getElementById('status-jogador').innerText = statusLegivel(data.status);
+                document.getElementById('log-batalha').innerText = data.mensagem;
+                seletor.options[seletor.selectedIndex].text = seletor.options[seletor.selectedIndex].text.replace(/\(x(\d+)\)/, function(m, qtd) {
+                    return '(x' + (parseInt(qtd, 10) - 1) + ')';
+                });
+                if (seletor.options[seletor.selectedIndex].text.indexOf('(x0)') !== -1) {
+                    seletor.remove(seletor.selectedIndex);
+                    seletor.selectedIndex = 0;
+                }
+            } catch (erro) {
+                document.getElementById('log-batalha').innerText = erro.message;
+            }
+        }
+
+        function statusLegivel(status) {
+            if (!status) return 'Saudável';
+            const nomes = {
+                burn: 'Queimado',
+                freeze: 'Congelado',
+                paralysis: 'Paralisado',
+                poison: 'Envenenado',
+                sleep: 'Dormindo'
+            };
+            const tipo = status.split(':')[0];
+            return nomes[tipo] || status;
+        }
+
+        function trocarPokemon(botao) {
+            const idSlot = parseInt(botao.dataset.idSlot, 10);
+            if (idSlot === parseInt(pokemonAtivo.idSlot, 10)) return;
+
+            const botaoAnterior = document.getElementById('troca-' + pokemonAtivo.idSlot);
+            if (botaoAnterior) {
+                botaoAnterior.dataset.hp = pokemonAtivo.hp;
+                botaoAnterior.dataset.status = pokemonAtivo.status || '';
+                botaoAnterior.innerText = `${botaoAnterior.dataset.nome} (HP: ${pokemonAtivo.hp})`;
+            }
+
+            const nome = botao.dataset.nome;
+            const hp = parseInt(botao.dataset.hp, 10);
+            const hpMax = parseInt(botao.dataset.hpMax, 10);
+            const img = botao.dataset.img;
+            const atq1 = botao.dataset.ataque1;
+            const atq2 = botao.dataset.ataque2;
+            const tipo1 = botao.dataset.tipo1;
+            const atkStat = parseInt(botao.dataset.atk, 10);
+            const defStat = parseInt(botao.dataset.def, 10);
+            const speStat = parseInt(botao.dataset.spe, 10);
+            const status = botao.dataset.status || null;
+
             if (hp <= 0) {
                 alert("Pokémon desmaiado e não pode entrar em batalha");
                 return;
@@ -182,11 +298,15 @@
             pokemonAtivo.def = defStat;
             pokemonAtivo.spe = speStat;
             pokemonAtivo.hp = hp;
+            pokemonAtivo.hpMax = hpMax;
+            pokemonAtivo.status = status;
+            pokemonAtivo.tipo1 = tipo1;
 
             // Atualiza a interface visual (Nome, HP, Imagem)
             document.getElementById('nome-pk-ativo').innerText = `${nome} (Tipo: ${tipo1})`;
             document.getElementById('hp-jog-atual').innerText = hp;
             document.getElementById('hp-jog-max').innerText = hpMax;
+            document.getElementById('status-jogador').innerText = statusLegivel(status);
             document.getElementById('img-pk-ativo').src = img;
             document.getElementById('log-batalha').innerText = `Enviou ${nome}!`;
 
