@@ -13,12 +13,12 @@ $teamController = new TeamController($db);
 if ($action === 'login' || $action === 'autenticar') {
     switch ($action) {
         case 'login':
-            $authController->telaLogin();
-            break;
+        $authController->telaLogin();
+        break;
             
         case 'autenticar':
-            $authController->autenticar(); 
-            break;
+        $authController->autenticar(); 
+        break;
     }
     exit;
 }
@@ -33,31 +33,31 @@ if (!isset($_SESSION['idUsuario'])) {
 try {
     switch ($action) {
         case 'inicio':
-        require_once __DIR__ . '/View/inicio.php';
+        require_once __DIR__ . '/View/inicio.php'; //mostra tela com o menu pra ir pros outros lugares
         break;
 
         case 'loja':
-        $lojaController->index();
+        $lojaController->index(); //mostra a tela da loja
         break;
 
         case 'comprar':
-        $lojaController->comprar();
+        $lojaController->comprar(); //usado na loja para comprar itens
         break;
 
         case 'logout':
-        $authController->logout(); // Destrói a sessão e manda para o login
+        $authController->logout(); // destrói a sessão e manda para o login
         break;
 
         case 'montar_time':
-        $teamController->index(); 
+        $teamController->index(); //mostra a tela de montar times
         break;
 
         case 'novo_time':
-        $teamController->telaMontarTime();
+        $teamController->telaMontarTime(); //mostra a tela de escolher entre montar um time e mexer no seu time
         break;
 
         case 'salvar_time':
-        $teamController->salvarTime();
+        $teamController->salvarTime(); //função que salva o time usado em montar time
         break;
 
         case 'meus_times':
@@ -70,17 +70,17 @@ try {
 
         case 'batalha':
         $batalhaController = new BatalhaController($db);
-        $batalhaController->index(); // Abre a seleção de times
+        $batalhaController->index(); // abrir a tela para escolher entre times
         break;
 
         case 'arena':
         $batalhaController = new BatalhaController($db);
-        $batalhaController->arena(); // Abre a arena com o time escolhido
+        $batalhaController->arena(); // abrir a tela de batalha
         break;
 
         case 'processar_turno':
         $batalhaController = new BatalhaController($db);
-        $batalhaController->processarTurno();
+        $batalhaController->processarTurno(); // processa o turno, faz os calculos
         break;
 
         case 'usar_item_batalha':
@@ -92,8 +92,7 @@ try {
         echo "Página não encontrada!";
         break;
     }
-} catch (SemTimeException $e) {
-    // Captura a nossa exceção customizada, guarda a mensagem na sessão e redireciona
+} catch (SemTimeException $e) { //exceção personalizada para quando o usuário não tem time
     $_SESSION['erro_time'] = $e->getMessage();
     header("Location: index.php?action=novo_time");
     exit;

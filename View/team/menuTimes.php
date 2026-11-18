@@ -10,7 +10,7 @@
             src: url("fontes/PocketMonk-15ze.ttf");
         }
         body {
-            background-image: url("imagens/montarTime.png");
+            background-image: url("imagens/menuTime.jpg");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -91,7 +91,7 @@
             Ver times (e usar Itens)
         </a>
 
-        <a href="index.php?action=inicio" class="link-voltar"> Voltar ao Menu Principal</a>
+        <a href="index.php?action=inicio" class="link-voltar">Voltar ao Menu Principal</a>
     </div>
 </body>
 </html>

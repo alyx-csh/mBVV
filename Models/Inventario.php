@@ -6,7 +6,7 @@ class Inventario {
         $this->db = $db;
     }
 
-    public function adicionarItem($idUsuario, $idItem) {
+    public function adicionarItem($idUsuario, $idItem) { //pega um item e adiciona ele ao inventário, atribuindo-o um id
         $stmt = $this->db->prepare("SELECT * FROM inventario WHERE idUsuario = ? AND idItem = ?");
         $stmt->execute([$idUsuario, $idItem]);
         $itemInventario = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -19,7 +19,7 @@ class Inventario {
             return $stmtIns->execute([$idUsuario, $idItem]);
         }
     }
-    public function listarPorUsuario($idUsuario) {
+    public function listarPorUsuario($idUsuario) { //pega todos os itens que pertencem a um usuário específico
         $stmt = $this->db->prepare("
             SELECT inv.idInventario, inv.idItem, inv.quantidade, i.nome, i.descricao
             FROM inventario inv
@@ -31,7 +31,7 @@ class Inventario {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function buscarItemUsuario($idUsuario, $idItem) {
+    public function listarPorUsuario2($idUsuario, $idItem) { //pega todos os itens que pertencem a um usuário específico só q sem order
         $stmt = $this->db->prepare("
             SELECT inv.idInventario, inv.idItem, inv.quantidade, i.nome, i.descricao
             FROM inventario inv
@@ -42,7 +42,7 @@ class Inventario {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function consumirItem($idUsuario, $idItem) {
+    public function consumirItem($idUsuario, $idItem) { //diminue o item do inventário do usuário
         $stmt = $this->db->prepare("
             UPDATE inventario 
             SET quantidade = quantidade - 1 

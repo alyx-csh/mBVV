@@ -26,6 +26,7 @@ class PokemonEntity {
             }
         };
 
+        //pega os atributos base do pokémon e roda a função acima
         $this->hp  = $calcStat($dadosApi['stats'][0]['base_stat'], true);
         $this->atk = $calcStat($dadosApi['stats'][1]['base_stat']);
         $this->def = $calcStat($dadosApi['stats'][2]['base_stat']);
@@ -33,13 +34,13 @@ class PokemonEntity {
         $this->spD = $calcStat($dadosApi['stats'][4]['base_stat']);
         $this->spe = $calcStat($dadosApi['stats'][5]['base_stat']);
 
-        // Atribuição dos ataques: Ataque 1 baseado no tipo1 do Pokémon via PokéAPI, Ataque 2 normal (Tackle)
+        // faz o ataque 1 ser obrigatoriamente do tipo1 do pokémon e só deixa o ataque secundário como Tackle
         $this->ataque1 = PokeApiService::buscarAtaquePorTipo($this->tipo1);
         $this->ataque2 = "Tackle";
-
+        //seta a img do pokémon como o sprite que a API dá
         $this->img = $dadosApi['sprites']['front_default'] ?? '';
     }
-
+    //como todas os atributos são privados, precisa de um get public pra cada atributo
     public function getNome() { return $this->nome; }
     public function getTipo1() { return $this->tipo1; }
     public function getTipo2() { return $this->tipo2; }

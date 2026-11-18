@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <!-- estilo da página -->
     <style>
         @font-face {
             font-family: Pokemon;
@@ -21,19 +20,21 @@
 
         div.card-login { 
             width: 28%; 
+            min-width: 320px;
             background-color: rgba(232, 232, 232, 0.90); 
             display: flex; 
             flex-direction: column;
             align-items: center; 
-            justify-content: center;
+            justify-content: flex-start;
             position: absolute; 
             top: 0; bottom: 0; left: 0; right: 0; 
             margin: auto; 
-            height: 65vh; 
+            height: fit-content;
+            min-height: 65vh; 
             border-radius: 3vh; 
             border: 4px double #3B4CCA;
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            padding: 20px;
+            padding: 25px 20px;
             box-sizing: border-box;
         }
 
@@ -41,9 +42,11 @@
             font-family: Pokemon; 
             color: #FFDE00; 
             -webkit-text-stroke: 0.15vh #3B4CCA; 
-            font-size: 4vw; 
+            font-size: 3.5vw;
             text-align: center;
-            margin-bottom: 30px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            width: 100%;
         }
 
         form {
@@ -51,11 +54,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: auto;
+            margin-bottom: auto;
         }
 
         .input-group {
             width: 85%;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             display: flex;
             flex-direction: column;
         }
@@ -63,7 +68,7 @@
         label { 
             font-family: Helvetica; 
             font-weight: bold; 
-            font-size: 1.1em; 
+            font-size: 1.05em; 
             color: #333;
             margin-bottom: 5px;
         }
@@ -76,6 +81,14 @@
             border-radius: 8px;
             border: 2px solid #ccc;
             box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        input[type="file"] {
+            height: auto;
+            padding: 7px 10px;
+            font-size: 0.9em;
+            cursor: pointer;
         }
 
         input:focus {
@@ -87,7 +100,7 @@
         #submit { 
             width: 85%; 
             padding: 12px;
-            margin-top: 10px;
+            margin-top: 8px;
             border-radius: 1vh; 
             border: 3px double #3B4CCA;
             background-color: #FFDE00;
@@ -117,7 +130,7 @@
 <body>
     <!-- div do formulário -->
     <div class="card-login"> 
-        <h1 id="titulo">MonstroBolso</h1>
+        <h1 id="titulo">MonstroBolso VamoVe!</h1>
 
         <?php if(isset($_SESSION['erro_login'])): ?>
             <div class="erro">
@@ -128,13 +141,18 @@
         <form action="index.php?action=autenticar" method="POST" enctype="multipart/form-data">
 
             <div class="input-group">
-                <label for="Username">Nome de Usuário</label>
+                <label for="uninput">Nome de Usuário</label>
                 <input type="text" name="nome" id="uninput" placeholder="Nome de Usuário" required>
             </div>
             
             <div class="input-group">
-                <label for="Senha">Senha</label>
+                <label for="senhainput">Senha</label>
                 <input type="password" name="senha" id="senhainput" placeholder="Senha" required>
+            </div>
+
+            <div class="input-group">
+                <label for="fotoinput">Foto de Perfil</label>
+                <input type="file" name="foto" id="fotoinput" accept="image/*" required>
             </div>
 
             <button type="submit" id="submit">Entrar / Cadastrar</button>

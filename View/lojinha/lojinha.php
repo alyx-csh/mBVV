@@ -1,10 +1,3 @@
-<?php
-    // Se a sessão do usuário não existir, bloqueia e manda pro login
-    if (!isset($_SESSION['idUsuario'])) {
-        header("Location: index.php?action=login");
-        exit;
-    }
-?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
