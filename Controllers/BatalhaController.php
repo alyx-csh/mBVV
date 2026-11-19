@@ -2,6 +2,7 @@
 class BatalhaController {
     private $db;
 
+
     public function __construct($db) {
         $this->db = $db;
     }
@@ -235,11 +236,13 @@ class BatalhaController {
             $stmt = $this->db->prepare("UPDATE usuario SET dinheiro = dinheiro + 500, wins = wins + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " você derrotou o pokémon adversário e ganhou 500PkD$!";
+            $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("VITÓRIA");
         } elseif ($derrota) {
             $stmt = $this->db->prepare("UPDATE usuario SET loss = loss + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " seu pokémon desmaiou!";
+            $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("DERROTA");
         } else {
             $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
