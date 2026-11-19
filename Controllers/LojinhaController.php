@@ -73,11 +73,12 @@ class LojinhaController
 
     public function CriarLogLoja($nomeItem) {
 
+        $nomeUsuario = $_SESSION['nomeUsuario'];
         $diretorioLog = __DIR__ . '/../logs/logs_loja/';
 
         $arquivoLog = $diretorioLog . 'logLoja.txt';
         $dataHora = date("Y-m-d H:i:s");
-        $entradaLog = "[$dataHora] - COMPRA DE ITEM = $nomeItem" . PHP_EOL;
+        $entradaLog = "[$dataHora] - COMPRA DE ITEM = $nomeUsuario" . " - " . $nomeItem . PHP_EOL;
 
         file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
     }

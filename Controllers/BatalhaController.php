@@ -241,6 +241,8 @@ class BatalhaController {
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " seu pokémon desmaiou!";
             $this->CriarLogBatalha("DERROTA");
+        } else {
+            $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
         }
 
         echo json_encode([
@@ -257,7 +259,7 @@ class BatalhaController {
         exit;
     }
 
-    public function CriarLogBatalha($resultadoBatalha) {
+    public function CriarLogBatalha($resultadoBatalha, ) {
 
         $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
 
@@ -267,4 +269,18 @@ class BatalhaController {
 
         file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
     }
+
+    public function CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual) {
+
+        $nomeUsuario = $_SESSION['nomeUsuario'];
+        $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
+
+        $arquivoLog = $diretorioLog . 'logBatalha.txt';
+        $dataHora = date("Y-m-d H:i:s");
+        $entradaLog = "[$dataHora] - $nomeUsuario CAUSOU " . $danoJogador . " DE DANO (VIDA ATUAL " . $hpJogAtual . ") - OPONENTE CAUSOU " . $danoOponente . " DE DANO (VIDA ATUAL " . $hpOpoAtual . ")" . PHP_EOL;
+
+        file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
+    }
+
+    
 }
