@@ -199,13 +199,13 @@
                     desativarBotoesAtaque();
                     // Correção da atribuição de HTML no log
                     document.getElementById('log-batalha').innerHTML += "<br><strong>Pokémon desmaiado!</strong>";
-                    setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
+                    setTimeout(() => window.location.href = 'index.php?action=inicio', 2000);
                     return;
                 }
 
                 if (data.vitoria) {
                     desativarBotoesAtaque();
-                    setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
+                    setTimeout(() => window.location.href = 'index.php?action=inicio', 2000);
                 }
 
             } catch (erro) {
@@ -214,39 +214,44 @@
             }
         }
 
-        function trocarPokemon(idSlot, nome, hp, hpMax, img, atq1, atq2, tipo1, atkStat, defStat, speStat) {
+        function statusLegivel(status) {
+            if (!status || status === 'null') return 'Saudável';
+            return status;
+        }
+
+        function trocarPokemon(botao) {
+            const d = botao.dataset;
+            const hp = parseInt(d.hp, 10);
+
             if (hp <= 0) {
                 alert("Pokémon desmaiado e não pode entrar em batalha");
                 return;
             }
 
-            // atualiza os dados do Pokémon ativo
-            pokemonAtivo.idSlot = idSlot;
-            pokemonAtivo.atk = atkStat;
-            pokemonAtivo.def = defStat;
-            pokemonAtivo.spe = speStat;
+            pokemonAtivo.idSlot = parseInt(d.idSlot, 10);
+            pokemonAtivo.atk = parseInt(d.atk, 10);
+            pokemonAtivo.def = parseInt(d.def, 10);
+            pokemonAtivo.spe = parseInt(d.spe, 10);
             pokemonAtivo.hp = hp;
-            pokemonAtivo.hpMax = hpMax;
-            pokemonAtivo.status = status;
-            pokemonAtivo.tipo1 = tipo1;
+            pokemonAtivo.hpMax = parseInt(d.hpMax, 10);
+            pokemonAtivo.status = d.status || null;
+            pokemonAtivo.tipo1 = d.tipo1;
 
-            // atualiza a GUI
-            document.getElementById('nome-pk-ativo').innerText = `${nome} (Tipo: ${tipo1})`;
+            document.getElementById('nome-pk-ativo').innerText = `${d.nome}`;
             document.getElementById('hp-jog-atual').innerText = hp;
-            document.getElementById('hp-jog-max').innerText = hpMax;
-            document.getElementById('status-jogador').innerText = statusLegivel(status);
-            document.getElementById('img-pk-ativo').src = img;
-            document.getElementById('log-batalha').innerText = `Enviou ${nome}!`;
+            document.getElementById('hp-jog-max').innerText = d.hpMax;
+            document.getElementById('status-jogador').innerText = statusLegivel(pokemonAtivo.status);
+            document.getElementById('img-pk-ativo').src = d.img;
+            document.getElementById('log-batalha').innerText = `Enviou ${d.nome}!`;
 
-            // atualiza os ataques do pokemon
             const btn1 = document.getElementById('btn-ataque1');
             const btn2 = document.getElementById('btn-ataque2');
 
-            btn1.innerText = atq1;
-            btn1.setAttribute("onclick", `executarAto('ataque1', '${atq1}')`);
+            btn1.innerText = d.ataque1;
+            btn1.setAttribute("onclick", `executarAto('ataque1', '${d.ataque1}')`);
 
-            btn2.innerText = atq2;
-            btn2.setAttribute("onclick", `executarAto('ataque2', '${atq2}')`);
+            btn2.innerText = d.ataque2;
+            btn2.setAttribute("onclick", `executarAto('ataque2', '${d.ataque2}')`);
         }
         //desativa os botões de ataque para quando o pokémon morre
         function desativarBotoesAtaque() {

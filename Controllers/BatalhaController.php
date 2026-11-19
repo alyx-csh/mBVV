@@ -17,7 +17,7 @@ class BatalhaController {
             $timesBrutos = $timeModel->buscarTimesDoUsuario($_SESSION['idUsuario']);
 
             if (empty($timesBrutos)) {
-                throw new SemTimeException("Precisas de montar pelo menos um time antes de entrar na arena de batalha!");
+                throw new SemTimeException("Você precisa de um time para batalhar");
             }
 
             $timesCompletos = [];
@@ -170,7 +170,7 @@ class BatalhaController {
                 'statusOponente' => $statusOponente,
                 'vitoria' => false,
                 'derrota' => true,
-                'mensagem' => "Seu pokémon desmaiou e não pode mais lutar!"
+                'mensagem' => "Seu pokémon desmaiou e não pode mais lutar"
             ]);
             exit;
         }
@@ -194,26 +194,26 @@ class BatalhaController {
             $danoJogador = $calcularDano($pkJog['atk'], $pkOpo['def'], $isTipo1);
             $hpOpoAtual = max(0, $hpOpoAtual - $danoJogador);
             
-            $logTurno .= "Usaste o ataque! Causaste {$danoJogador} de dano. ";
+            $logTurno .= "Seu pokémon atacou e causou {$danoJogador} de dano ";
 
             if ($hpOpoAtual > 0) {
                 $atqOpoTipo1 = (rand(0, 1) == 1);
                 $danoOponente = $calcularDano($pkOpo['atk'], $pkJog['def'], $atqOpoTipo1);
                 $hpJogAtual = max(0, $hpJogAtual - $danoOponente);
-                $logTurno .= "Oponente contra-atacou e causou {$danoOponente} de dano!";
+                $logTurno .= "o pokémon oponente atacou e causou {$danoOponente} de dano ";
             }
         } else {
             $atqOpoTipo1 = (rand(0, 1) == 1);
             $danoOponente = $calcularDano($pkOpo['atk'], $pkJog['def'], $atqOpoTipo1);
             $hpJogAtual = max(0, $hpJogAtual - $danoOponente);
             
-            $logTurno .= "O oponente foi mais rápido e causou {$danoOponente} de dano! ";
+            $logTurno .= "O pokémon oponente atacou e causou {$danoOponente} de dano ";
 
             if ($hpJogAtual > 0) {
                 $isTipo1 = ($tipoAtaque === 'ataque1');
                 $danoJogador = $calcularDano($pkJog['atk'], $pkOpo['def'], $isTipo1);
                 $hpOpoAtual = max(0, $hpOpoAtual - $danoJogador);
-                $logTurno .= "Retaliação! Causaste {$danoJogador} de dano.";
+                $logTurno .= "seu pokémon atacou e causou {$danoJogador} de dano ";
             }
         }
 
