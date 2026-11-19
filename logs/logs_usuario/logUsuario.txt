@@ -1,4 +1,0 @@
-[2026-11-19 01:29:08] - USUÁRIO LOGADO = bananatorrada
-[2026-11-19 01:34:53] - USUÁRIO LOGADO = Getulio Vargas
-[2026-11-19 01:39:08] - USUÁRIO LOGADO = Guilherme Pereira
-[2026-11-19 12:34:37] - USUÁRIO LOGADO = Bananatorrada

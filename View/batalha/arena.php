@@ -198,14 +198,15 @@
                 if (data.derrota || pokemonAtivo.hp <= 0) {
                     desativarBotoesAtaque();
                     // Correção da atribuição de HTML no log
-                    document.getElementById('log-batalha').innerHTML += "<br><strong>Pokémon desmaiado!</strong>";
-                    setTimeout(() => window.location.href = 'index.php?action=inicio', 2000);
+                    document.getElementById('log-batalha').innerHTML += "<br><strong>Pokémon desmaiou, redirecionando à tela inicial...</strong>";
+                    setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
                     return;
                 }
 
                 if (data.vitoria) {
                     desativarBotoesAtaque();
-                    setTimeout(() => window.location.href = 'index.php?action=inicio', 2000);
+                    document.getElementById('log-batalha').innerHTML += "<br><strong>Você ganhou, redirecionando à tela inicial...</strong>";
+                    setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
                 }
 
             } catch (erro) {
