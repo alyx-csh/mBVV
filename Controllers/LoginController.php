@@ -9,7 +9,9 @@ class LoginController {
 
     public function telaLogin() {
         // Se já tá logado, manda pro início
+        $nome = $_POST['nome'] ?? '';
         if (isset($_SESSION['idUsuario'])) {
+            $this->CriarLogUsuario($nome);
             header("Location: index.php?action=inicio");
             exit;
         }
@@ -60,6 +62,7 @@ class LoginController {
                 }
                 $_SESSION['idUsuario'] = $usuario['idUsuario'];
                 $_SESSION['nomeUsuario'] = $usuario['nome'];
+                $this->CriarLogUsuario($nome);
                 header("Location: index.php?action=inicio");
                 exit;
             } else {
@@ -75,7 +78,7 @@ class LoginController {
             $novoUsuario = $usuarioModel->buscarPorNome($nome);
             $_SESSION['idUsuario'] = $novoUsuario['idUsuario'];
             $_SESSION['nomeUsuario'] = $novoUsuario['nome'];
-            
+            $this->CriarLogUsuario($nome);
             header("Location: index.php?action=inicio");
             exit;
         }
@@ -84,5 +87,16 @@ class LoginController {
         session_destroy();
         header("Location: index.php?action=login");
         exit;
+    }
+
+    public function CriarLogUsuario($nome) {
+
+        $diretorioLog = __DIR__ . '/../logs/logs_usuario/';
+
+        $arquivoLog = $diretorioLog . 'logUsuario.txt';
+        $dataHora = date("Y-m-d H:i:s");
+        $entradaLog = "[$dataHora] - USUÁRIO LOGADO = $nome" . PHP_EOL;
+
+        file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
     }
 }

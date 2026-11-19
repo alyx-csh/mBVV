@@ -60,6 +60,8 @@ class LojinhaController
                 $usuarioModel->atualizarDinheiro($idUsuario, $novoDinheiro);
                 $inventarioModel->adicionarItem($idUsuario, $idItem);
 
+                $this->CriarLogLoja($item['nome']);
+
                 $_SESSION['mensagem'] = "Item comprado!";
             } else {
                 $_SESSION['erro'] = "Pobretão.";
@@ -67,5 +69,16 @@ class LojinhaController
         }
         header("Location: index.php?action=loja");
         exit;
+    }
+
+    public function CriarLogLoja($nomeItem) {
+
+        $diretorioLog = __DIR__ . '/../logs/logs_loja/';
+
+        $arquivoLog = $diretorioLog . 'logLoja.txt';
+        $dataHora = date("Y-m-d H:i:s");
+        $entradaLog = "[$dataHora] - COMPRA DE ITEM = $nomeItem" . PHP_EOL;
+
+        file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
     }
 }

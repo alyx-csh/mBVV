@@ -81,12 +81,6 @@ try {
         $batalhaController->processarTurno(); // processa o turno, faz os calculos
         break;
 
-        case 'criar_log':
-        $resultado = $_POST['resultado'] ?? 'Desconhecido';
-        $this->CriarLog($resultado);
-        echo json_encode(['sucesso' => true]);
-        exit;
-
         default:
         echo "Página não encontrada!";
         break;
