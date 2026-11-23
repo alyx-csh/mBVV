@@ -80,7 +80,15 @@ try {
         case 'processar_turno':
         $batalhaController->processarTurno(); // processa o turno, faz os calculos
         break;
+        
+        case 'mudar_perfil':
+        $authController->telaMudarPerfil(); // Abre a página mudarPerfil.php
+        break;
 
+        case 'salvar_perfil':
+        $authController->salvarPerfil(); // Faz o upload e atualiza o banco
+        break;
+        
         default:
         echo "Página não encontrada!";
         break;

@@ -23,7 +23,7 @@ class Usuario {
     $img = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{$pokemonId}.png";
     $stmt = $this->db->prepare("INSERT INTO usuario (nome, senha, dinheiro, img) VALUES (?, ?, 5000, ?)");
     return $stmt->execute([$nome, $senhaHash, $img]);
-}
+    }
 
     public function atualizarImagem($idUsuario, $img) {
         $stmt = $this->db->prepare("UPDATE usuario SET img = ? WHERE idUsuario = ?");

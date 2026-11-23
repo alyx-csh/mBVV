@@ -17,6 +17,31 @@ class LoginController {
         }
         require_once __DIR__ . '/../View/login/loginInicio.php';
     }
+    public function telaMudarPerfil() {
+        require_once __DIR__ . '/../View/login/mudarPerfil.php'; 
+    }
+
+    public function salvarPerfil() {
+        if (!isset($_SESSION['idUsuario'])) {
+            header("Location: index.php?action=login");
+            exit;
+        }
+
+        $caminhoImagem = $this->salvarImagemUpload();
+
+        if ($caminhoImagem !== null) {
+            $usuarioModel = new Usuario($this->db);
+            $usuarioModel->atualizarImagem($_SESSION['idUsuario'], $caminhoImagem);
+            
+            // Volta para o início já mostrando a foto nova
+            header("Location: index.php?action=inicio");
+            exit;
+        } else {
+            $_SESSION['erro_login'] = "Selecione uma imagem válida (JPG, PNG ou WEBP).";
+            header("Location: index.php?action=mudar_perfil");
+            exit;
+        }
+    }
 
     private function salvarImagemUpload() {
         if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {

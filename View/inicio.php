@@ -8,7 +8,7 @@ if (!isset($_SESSION['idUsuario'])) {
 $usuarioModel = new Usuario($db);
 $usuario = $usuarioModel->buscarPorId($_SESSION['idUsuario']);
 $nome = $usuario['nome'];
-$fotoPerfil = !empty($usuario['img']) && file_exists(__DIR__ . '/../' . $usuario['img']) ? $usuario['img'] : null;
+$fotoPerfil = $usuario['img'];
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -158,7 +158,7 @@ $fotoPerfil = !empty($usuario['img']) && file_exists(__DIR__ . '/../' . $usuario
         <?php endif; ?>
         <div class="info-login">
             <p class="nome-login"><?php echo htmlspecialchars($nome); ?></p>
-            <a href="index.php?action=logout" class="btn-logout">Mudar Login</a>
+            <a href="index.php?action=mudar_perfil" class="btn-logout">Mudar perfil</a>
         </div>
     </div>
 
