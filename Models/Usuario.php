@@ -19,12 +19,10 @@ class Usuario {
 
     public function cadastrar($nome, $senha) { //usada para fazer o login do novo usuário
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
-        pokemonCount = 1025;
-        var pokedex = {};
+        $pokemonCount = 1025;
 
-        window.onload = async function () {
-            getPokemon(419);
-        }
+        $numPokemon = rand(1, $pokemonCount);
+        $img = $this->getPokemon($numPokemon);
 
         async function getPokemon(num) {
             let url = "https://pokeapi.co/api/v2/pokemon/" + num.toString;
@@ -32,16 +30,8 @@ class Usuario {
             let res = await fetch(url);
             let pokemon = await res.json();
             // console.log(pokemon);
-
-            let pokemonName = pokemon["name"];
-            let pokemonType = pokemon["types"];
             let pokemonImg = pokemon["sprites"]["front_default"];
 
-            res = await fetch(pokemon["species"]["url"]);
-            let pokemonDesc = await res.json;
-
-            // console.log(pokemonDesc);
-            pokemonDesc = pokemonDesc["flavor_text_entries"][9]
         }
         $stmt = $this->db->prepare("INSERT INTO usuario (nome, senha, dinheiro, img) VALUES (?, ?, 5000, ?)");
         return $stmt->execute([$nome, $senhaHash, $img]);
