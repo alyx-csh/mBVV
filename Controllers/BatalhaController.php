@@ -237,13 +237,13 @@ class BatalhaController {
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " você derrotou o pokémon adversário e ganhou 500PkD$!";
             $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
-            $this->CriarLogBatalha("VITÓRIA");
+            $this->CriarLogBatalha("VITÓRIA", $pkJog, $pkOpo);
         } elseif ($derrota) {
             $stmt = $this->db->prepare("UPDATE usuario SET loss = loss + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " seu pokémon desmaiou!";
             $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
-            $this->CriarLogBatalha("DERROTA");
+            $this->CriarLogBatalha("DERROTA", $pkJog, $pkOpo);
         } else {
             $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
         }
@@ -262,15 +262,18 @@ class BatalhaController {
         exit;
     }
 
-    public function CriarLogBatalha($resultadoBatalha, ) {
+    public function CriarLogBatalha($resultadoBatalha, $pkJog, $pkOpo) {
 
         $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
+        $nomeUsuario = $_SESSION['nomeUsuario'];
 
         $arquivoLog = $diretorioLog . 'logBatalha.txt';
         $dataHora = date("Y-m-d H:i:s");
-        $entradaLog = "[$dataHora] - LOG DE BATALHA = $resultadoBatalha" . PHP_EOL;
+        $entradaLog = "[$dataHora] - LOG DE BATALHA DE $nomeUsuario (UTILIZANDO {$pkJog['nome']}) = $resultadoBatalha CONTRA {$pkOpo['nome']} OPONENTE" . PHP_EOL;
 
         file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
+        $stmt = $this->db->prepare("INSERT INTO logBatalha (idUser, pokeOp, idTime, textoLog) VALUES (?, ?, ?, ?)");
+        $ $stmt->execute([$_SESSION['idUsuario'], $pkOpo['nome'], $pkJog['idTimes'], $entradaLog]);
     }
 
     public function CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual) {
