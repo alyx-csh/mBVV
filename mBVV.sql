@@ -1,12 +1,10 @@
 use mBVV;
 
 DROP TABLE IF EXISTS pokemon;
-DROP TABLE IF EXISTS log;
-DROP TABLE IF EXISTS batalha;
+DROP TABLE IF EXISTS logBatalha;
 DROP TABLE IF EXISTS times;
 DROP TABLE IF EXISTS inventario;
 DROP TABLE IF EXISTS slot;
-DROP TABLE IF EXISTS ataque;
 DROP TABLE IF EXISTS item;
 DROP TABLE IF EXISTS usuario;
 
@@ -22,16 +20,6 @@ spA int not null CHECK (spA  >= 0 AND spA <= 255),
 spD int not null CHECK (spD >= 0 AND spD <= 255),
 spe int not null CHECK (spe >= 0 AND spe <= 255),
 img varchar(150) not null
-);
-
-CREATE TABLE ataque(
-idAtaque int auto_increment primary key,
-nome varchar(50) NOT  null,
-tipo varchar(30) NOT null,
-fisSpe boolean, /*0=físico e 1=especial, o que acham?*/
-poder int not null,
-prioridade int default 0 check (prioridade >= -7 and prioridade <= 5),
-pp int check (pp >= 5 and pp <= 40)
 );
 
 create table usuario(
@@ -99,31 +87,13 @@ foreign key (idSlot6) references slot(idSlot),
 foreign key (idUsuario) references usuario(idUsuario)
 );
 
-CREATE TABLE batalha(
-idBatalha int auto_increment primary key,
-idUser1 int,
-idUser2 int,
-idTimes1 int,
-idTimes2 int,
-foreign key (idUser1) references usuario(idUsuario),
-foreign key (idUser2) references usuario(idUsuario),
-foreign key (idTimes1) references times(idTimes),
-foreign key (idTimes2) references times(idTimes)
-);
-
-create table log(
+CREATE TABLE logBatalha(
 idLog int auto_increment primary key,
-idBatalha int,
-idUser1 int,
-idUser2 int,
-idTimes1 int,
-idTimes2 int,
-arquivo varchar(50),
-foreign key (idBatalha) references batalha(idBatalha),
-foreign key (idUser1) references usuario(idUsuario),
-foreign key (idUser2) references usuario(idUsuario),
-foreign key (idTimes1) references times(idTimes),
-foreign key (idTimes2) references times(idTimes)
+idUser int,
+pokeOp varchar(50),
+idTime int,
+foreign key (idUser) references usuario(idUsuario),
+foreign key (idTime) references times(idTimes)
 );
 
 insert into item (nome, descricao, preco) values

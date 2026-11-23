@@ -145,10 +145,10 @@ $fotoPerfil = !empty($usuario['img']) && file_exists(__DIR__ . '/../' . $usuario
         <!-- leva pra loja -->
         <a href="index.php?action=loja" class="btn-opcao">Lojinha</a>
 
-        <!-- leva pra batalha (fazer um trigger pra se não tiver nenhum Pokémon não entra)-->
+        <!-- leva pra batalha -->
         <a href="index.php?action=batalha" class="btn-opcao">Batalhar</a>
 
-        <!-- montar  -->
+        <!-- montar -->
         <a href="index.php?action=montar_time" class="btn-opcao">Montar time</a>
     </div>
 

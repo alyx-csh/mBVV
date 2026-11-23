@@ -1,4 +1,0 @@
-[2026-11-19 13:22:43] - COMPRA DE ITEM = Bananatorrada - Revive
-[2026-11-19 13:22:45] - COMPRA DE ITEM = Bananatorrada - Hyper Potion
-[2026-11-19 13:22:46] - COMPRA DE ITEM = Bananatorrada - Super Potion
-[2026-11-19 13:22:47] - COMPRA DE ITEM = Bananatorrada - Super Potion

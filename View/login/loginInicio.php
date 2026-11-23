@@ -96,7 +96,6 @@
             outline: none;
         }
 
-        /* Botão estilizado com o padrão da loja e centralizado */
         #submit { 
             width: 85%; 
             padding: 12px;
@@ -148,11 +147,6 @@
             <div class="input-group">
                 <label for="senhainput">Senha</label>
                 <input type="password" name="senha" id="senhainput" placeholder="Senha" required>
-            </div>
-
-            <div class="input-group">
-                <label for="fotoinput">Foto de Perfil</label>
-                <input type="file" name="foto" id="fotoinput" accept="image/*" required>
             </div>
 
             <button type="submit" id="submit">Entrar / Cadastrar</button>
