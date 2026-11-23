@@ -92,6 +92,7 @@ idLog int auto_increment primary key,
 idUser int,
 pokeOp varchar(50),
 idTime int,
+textoLog varchar(1000),
 foreign key (idUser) references usuario(idUsuario),
 foreign key (idTime) references times(idTimes)
 );
