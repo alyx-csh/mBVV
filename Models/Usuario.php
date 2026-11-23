@@ -24,7 +24,7 @@ class Usuario {
         $numPokemon = rand(1, $pokemonCount);
         $img = $this->getPokemon($numPokemon);
 
-        async function getPokemon(num) {
+        function getPokemon(num) {
             let url = "https://pokeapi.co/api/v2/pokemon/" + num.toString;
 
             let res = await fetch(url);
