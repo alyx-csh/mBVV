@@ -5,13 +5,13 @@ class BatalhaController {
         $this->db = $db;
     }
 
-    public function index() { 
-        if (!isset($_SESSION['idUsuario'])) { //se usuário não estiver logado, é levado pro login
+    public function index() {
+        if (!isset($_SESSION['idUsuario'])) { // se usuário não estiver logado, é levado pro login
             header("Location: index.php?action=login");
             exit;
         }
 
-        try { //checa pra ver se o usuário tem time
+        try { // checa pra ver se o usuário tem time
             $timeModel = new Time($this->db);
             $timesBrutos = $timeModel->buscarTimesDoUsuario($_SESSION['idUsuario']);
 
@@ -40,21 +40,19 @@ class BatalhaController {
                 throw new SemPokVivoException("Time incapaz de lutar, compre revive(s) para lutar com este time");
             }
             require_once __DIR__ . '/../View/batalha/selecionarTime.php';
-
         } catch (SemTimeException $e) { // exception para caso o usuário não tenha time, botar ele direto na página de carregar time
             $_SESSION['erro_time'] = $e->getMessage();
             header("Location: index.php?action=novo_time");
             exit;
-        } catch (SemPokVivoException $e) { //exception para caso o usuário tenha time, porém os pokémons estejam mortos
+        } catch (SemPokVivoException $e) { // exception para caso o usuário tenha time, porém os pokémons estejam mortos
             $_SESSION['erro_vida'] = $e->getMessage();
             header("Location: index.php?action=loja");
-            exit; 
+            exit;
         } catch (Exception $e) { // exception pra caso os times não carreguem
             $_SESSION['erro_batalha'] = "Erro ao carregar times: " . $e->getMessage();
             header("Location: index.php?action=inicio");
             exit;
-        } 
-        
+        }
     }
 
     public function arena() {
@@ -76,12 +74,13 @@ class BatalhaController {
             }
 
             $temPokemonVivo = false;
-            foreach ($timeAtual['pokemons'] as $pokemon) {
+            foreach ($timeAtual['pokemons'] as &$pokemon) {
+                $pokemon['status'] = $this->normalizarStatus($pokemon['status'] ?? null);
                 if (isset($pokemon['hp']) && (int)$pokemon['hp'] > 0) {
                     $temPokemonVivo = true;
-                    break;
                 }
             }
+            unset($pokemon);
             if (!$temPokemonVivo) {
                 throw new SemPokVivoException("Time escolhido incapaz de lutar, compre revive(s)");
             }
@@ -90,9 +89,8 @@ class BatalhaController {
             $itensUsuario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
             $oponente = $this->gerarOponenteAleatorio();
 
-            $_SESSION['turno_batalha'] = 0; //reiniciar contador de turno
+            $_SESSION['turno_batalha'] = 0; // reiniciar contador de turno
             require_once __DIR__ . '/../View/batalha/arena.php';
-
         } catch (SemPokVivoException $e) {
             $_SESSION['erro_vida'] = $e->getMessage();
             header("Location: index.php?action=loja");
@@ -100,7 +98,7 @@ class BatalhaController {
         }
     }
 
-    private function buscarDetalhesTime($idTimes) { //função pra pegar os detalhes do time, quem tá nele assim como seu HP
+    private function buscarDetalhesTime($idTimes) { // função pra pegar os detalhes do time, quem tá nele assim como seu HP
         $stmt = $this->db->prepare("SELECT * FROM times WHERE idTimes = ?");
         $stmt->execute([$idTimes]);
         $time = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -132,7 +130,7 @@ class BatalhaController {
         ];
     }
 
-    private function gerarOponenteAleatorio() { //vai na API e pega um pokémon para batalhar contigo, podendo ser modificado via rand, dando a opção de limitar a alguma geração
+    private function gerarOponenteAleatorio() { // vai na API e pega um pokémon para batalhar contigo
         $idAleatorio = rand(1, 1025);
         $dadosApi = PokeApiService::buscarPokemonDaApi($idAleatorio);
 
@@ -147,58 +145,192 @@ class BatalhaController {
             ];
         }
 
-    $nome = ucfirst($dadosApi['name']);
-    $tipo1 = ucfirst($dadosApi['types'][0]['type']['name']);
-        
-    $calcStat = function($baseStat, $isHp = false) {
-        if ($isHp) {
-            return floor(((2 * $baseStat + 31) * 50) / 100) + 50 + 10;
-        } else {
-            return floor((floor(((2 * $baseStat + 31) * 50) / 100) + 5));
-        }
-    };
+        $nome = ucfirst($dadosApi['name']);
+        $tipo1 = ucfirst($dadosApi['types'][0]['type']['name']);
 
-    $hp = $calcStat($dadosApi['stats'][0]['base_stat'], true);
-    $atk = $calcStat($dadosApi['stats'][1]['base_stat']);
-    $def = $calcStat($dadosApi['stats'][2]['base_stat']);
-    $spe = $calcStat($dadosApi['stats'][5]['base_stat']);
+        $calcStat = function($baseStat, $isHp = false) {
+            if ($isHp) {
+                return floor(((2 * $baseStat + 31) * 50) / 100) + 50 + 10;
+            } else {
+                return floor((floor(((2 * $baseStat + 31) * 50) / 100) + 5));
+            }
+        };
 
-    $ataque1 = PokeApiService::buscarAtaquePorTipo($tipo1);
-    $ataque2 = "Tackle";
-    $img = $dadosApi['sprites']['front_default'] ?? '';
+        $hp = $calcStat($dadosApi['stats'][0]['base_stat'], true);
+        $atk = $calcStat($dadosApi['stats'][1]['base_stat']);
+        $def = $calcStat($dadosApi['stats'][2]['base_stat']);
+        $spe = $calcStat($dadosApi['stats'][5]['base_stat']);
 
-    return [
-        'nome' => $nome,
-        'tipo1' => $tipo1,
-        'hpMax' => $hp,
-        'hp' => $hp,
-        'atk' => $atk,
-        'def' => $def,
-        'spe' => $spe,
-        'ataque1' => $ataque1,
-        'ataque2' => $ataque2,
-        'img' => $img
+        $ataque1 = PokeApiService::buscarAtaquePorTipo($tipo1);
+        $ataque2 = "Tackle";
+        $img = $dadosApi['sprites']['front_default'] ?? '';
+
+        return [
+            'nome' => $nome,
+            'tipo1' => $tipo1,
+            'hpMax' => $hp,
+            'hp' => $hp,
+            'atk' => $atk,
+            'def' => $def,
+            'spe' => $spe,
+            'ataque1' => $ataque1,
+            'ataque2' => $ataque2,
+            'img' => $img
         ];
+    }
+
+    private function normalizarStatus(?string $status): ?string {
+        if ($status === null) {
+            return null;
+        }
+
+        $valor = mb_strtolower(trim($status));
+        if ($valor === '' || $valor === 'null' || $valor === 'saudável' || $valor === 'saudavel') {
+            return null;
+        }
+
+        $mapa = [
+            'burn' => 'queimado',
+            'burned' => 'queimado',
+            'queimado' => 'queimado',
+            'brn' => 'queimado',
+
+            'paralysis' => 'paralisado',
+            'paralyzed' => 'paralisado',
+            'paralisado' => 'paralisado',
+            'par' => 'paralisado',
+
+            'freeze' => 'congelado',
+            'frozen' => 'congelado',
+            'congelado' => 'congelado',
+            'frz' => 'congelado',
+
+            'poison' => 'envenenado',
+            'poisoned' => 'envenenado',
+            'envenenado' => 'envenenado',
+            'psn' => 'envenenado',
+
+            'sleep' => 'dormindo',
+            'asleep' => 'dormindo',
+            'dormindo' => 'dormindo',
+            'slp' => 'dormindo',
+        ];
+
+        return $mapa[$valor] ?? $valor;
+    }
+
+    private function sortearNovoStatus(?string $statusAtual, string $tipoAtaque, string $tipoPokemon, string $nomeAlvo, string &$log): ?string {
+        if ($statusAtual !== null) {
+            return $statusAtual;
+        }
+
+        $tipoLower = mb_strtolower(trim($tipoPokemon));
+        $candidato = null;
+        $chance = 0;
+
+        if ($tipoAtaque === 'ataque1') {
+            if ($tipoLower === 'fire') {
+                $candidato = 'queimado';
+                $chance = 20;
+            } elseif ($tipoLower === 'electric') {
+                $candidato = 'paralisado';
+                $chance = 20;
+            } elseif ($tipoLower === 'ice') {
+                $candidato = 'congelado';
+                $chance = 15;
+            } elseif ($tipoLower === 'poison') {
+                $candidato = 'envenenado';
+                $chance = 25;
+            }
+        } elseif ($tipoAtaque === 'ataque2') {
+            $candidato = 'dormindo';
+            $chance = 15;
+        }
+
+        if ($candidato !== null && rand(1, 100) <= $chance) {
+            $log .= "{$nomeAlvo} foi afetado por {$candidato}! ";
+            return $candidato;
+        }
+
+        return null;
+    }
+
+    private function podeAgirNoTurno(?string &$status, string $nomePk, string &$log): bool {
+        if ($status === 'paralisado') {
+            if (rand(1, 100) <= 25) {
+                $log .= "{$nomePk} está paralisado e não conseguiu atacar! ";
+                return false;
+            }
+        } elseif ($status === 'congelado') {
+            if (rand(1, 100) <= 20) {
+                $status = null;
+                $log .= "{$nomePk} descongelou! ";
+            } else {
+                $log .= "{$nomePk} está congelado e não pode se mover! ";
+                return false;
+            }
+        } elseif ($status === 'dormindo') {
+            if (rand(1, 100) <= 33) {
+                $status = null;
+                $log .= "{$nomePk} acordou! ";
+            } else {
+                $log .= "{$nomePk} está dormindo! ";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function calcularDanoResidualStatus(?string $status, int $hpMax, string $nomePk, string &$log): int {
+        if ($hpMax <= 0) {
+            return 0;
+        }
+
+        if ($status === 'envenenado') {
+            $dano = max(1, (int) floor($hpMax / 8));
+            $log .= "{$nomePk} sofreu {$dano} de dano por envenenamento! ";
+            return $dano;
+        }
+
+        if ($status === 'queimado') {
+            $dano = max(1, (int) floor($hpMax / 16));
+            $log .= "{$nomePk} sofreu {$dano} de dano por queimadura! ";
+            return $dano;
+        }
+
+        return 0;
     }
 
     public function processarTurno() {
         header('Content-Type: application/json');
+
+        if (!isset($_SESSION['idUsuario'])) {
+            http_response_code(401);
+            echo json_encode(['erro' => 'Sessão expirada.']);
+            exit;
+        }
+
         $input = json_decode(file_get_contents('php://input'), true);
-        
+
         $tipoAtaque = $input['tipoAtaque'] ?? 'ataque2';
         $pkJog = $input['pokemonAtivo'] ?? [];
         $pkOpo = $input['oponente'] ?? [];
-        $idSlotAtivo = $pkJog['idSlot'] ?? null;
+        $idSlotAtivo = !empty($pkJog['idSlot']) ? (int) $pkJog['idSlot'] : null;
 
-        $statusJogador = $pkJog['status'] ?? null;
-        $statusOponente = $pkOpo['status'] ?? null;
-        $jogadorAtacaPrimeiro = (intval($pkJog['spe'] ?? 0) >= intval($pkOpo['spe'] ?? 0));
+        $statusJogador = $this->normalizarStatus($pkJog['status'] ?? null);
+        $statusOponente = $this->normalizarStatus($pkOpo['status'] ?? null);
 
-        if (intval($pkJog['hp']) <= 0) {
+        $hpOpoAtual = max(0, intval($pkOpo['hp'] ?? 0));
+        $hpJogAtual = max(0, intval($pkJog['hp'] ?? 0));
+        $hpJogMax = max(1, intval($pkJog['hpMax'] ?? $hpJogAtual));
+        $hpOpoMax = max(1, intval($pkOpo['hpMax'] ?? $hpOpoAtual));
+
+        if ($hpJogAtual <= 0) {
             echo json_encode([
                 'danoJogador' => 0,
                 'danoOponente' => 0,
-                'hpOponente' => intval($pkOpo['hp'] ?? 0),
+                'hpOponente' => $hpOpoAtual,
                 'hpJogador' => 0,
                 'statusJogador' => $statusJogador,
                 'statusOponente' => $statusOponente,
@@ -209,59 +341,107 @@ class BatalhaController {
             exit;
         }
 
-        //seta os danos para zero e bota um null no logTurno
+        $speJogEfetiva = intval($pkJog['spe'] ?? 0) * ($statusJogador === 'paralisado' ? 0.5 : 1.0);
+        $speOpoEfetiva = intval($pkOpo['spe'] ?? 0) * ($statusOponente === 'paralisado' ? 0.5 : 1.0);
+        $jogadorAtacaPrimeiro = ($speJogEfetiva >= $speOpoEfetiva);
+
         $danoJogador = 0;
         $danoOponente = 0;
         $logTurno = "";
 
-        $calcularDano = function($atk, $def, $isTipo1) {
-            $base = (($atk / max(1, $def)) * 22) + 2;
-            if ($isTipo1) $base *= 1.5;
+        $calcularDano = function($atk, $def, $isTipo1, ?string $statusAtacante) {
+            $atkEfetivo = intval($atk);
+            if ($statusAtacante === 'queimado') {
+                $atkEfetivo = max(1, (int) floor($atkEfetivo * 0.5));
+            }
+            $base = (($atkEfetivo / max(1, intval($def))) * 22) + 2;
+            if ($isTipo1) {
+                $base *= 1.5;
+            }
             return max(5, intval($base * (rand(85, 100) / 100)));
         };
 
-        $hpOpoAtual = intval($pkOpo['hp']);
-        $hpJogAtual = intval($pkJog['hp']);
+        $nomeJog = $pkJog['nome'] ?? 'Seu Pokémon';
+        $nomeOpo = $pkOpo['nome'] ?? 'Oponente';
 
-        if ($jogadorAtacaPrimeiro) {
+        $executarAtaqueJogador = function() use (
+            &$danoJogador, &$hpOpoAtual, &$statusOponente, &$statusJogador, &$logTurno,
+            $tipoAtaque, $pkJog, $pkOpo, $nomeJog, $nomeOpo, $calcularDano
+        ) {
+            if (!$this->podeAgirNoTurno($statusJogador, $nomeJog, $logTurno)) {
+                return;
+            }
             $isTipo1 = ($tipoAtaque === 'ataque1');
-            $danoJogador = $calcularDano($pkJog['atk'], $pkOpo['def'], $isTipo1);
+            $danoJogador = $calcularDano($pkJog['atk'] ?? 100, $pkOpo['def'] ?? 100, $isTipo1, $statusJogador);
             $hpOpoAtual = max(0, $hpOpoAtual - $danoJogador);
-            
-            $logTurno .= "Seu pokémon atacou e causou {$danoJogador} de dano ";
+            $logTurno .= "{$nomeJog} atacou e causou {$danoJogador} de dano! ";
 
             if ($hpOpoAtual > 0) {
-                $atqOpoTipo1 = (rand(0, 1) == 1);
-                $danoOponente = $calcularDano($pkOpo['atk'], $pkJog['def'], $atqOpoTipo1);
-                $hpJogAtual = max(0, $hpJogAtual - $danoOponente);
-                $logTurno .= "o pokémon oponente atacou e causou {$danoOponente} de dano ";
+                $statusOponente = $this->sortearNovoStatus(
+                    $statusOponente,
+                    $tipoAtaque,
+                    $pkJog['tipo1'] ?? 'Normal',
+                    $nomeOpo,
+                    $logTurno
+                );
             }
-        } else {
-            $atqOpoTipo1 = (rand(0, 1) == 1);
-            $danoOponente = $calcularDano($pkOpo['atk'], $pkJog['def'], $atqOpoTipo1);
+        };
+
+        $executarAtaqueOponente = function() use (
+            &$danoOponente, &$hpJogAtual, &$statusJogador, &$statusOponente, &$logTurno,
+            $pkJog, $pkOpo, $nomeJog, $nomeOpo, $calcularDano
+        ) {
+            if (!$this->podeAgirNoTurno($statusOponente, $nomeOpo, $logTurno)) {
+                return;
+            }
+            $tipoAtqOpo = (rand(0, 1) == 1) ? 'ataque1' : 'ataque2';
+            $isTipo1 = ($tipoAtqOpo === 'ataque1');
+            $danoOponente = $calcularDano($pkOpo['atk'] ?? 100, $pkJog['def'] ?? 100, $isTipo1, $statusOponente);
             $hpJogAtual = max(0, $hpJogAtual - $danoOponente);
-            
-            $logTurno .= "O pokémon oponente atacou e causou {$danoOponente} de dano ";
+            $logTurno .= "{$nomeOpo} atacou e causou {$danoOponente} de dano! ";
 
             if ($hpJogAtual > 0) {
-                $isTipo1 = ($tipoAtaque === 'ataque1');
-                $danoJogador = $calcularDano($pkJog['atk'], $pkOpo['def'], $isTipo1);
-                $hpOpoAtual = max(0, $hpOpoAtual - $danoJogador);
-                $logTurno .= "seu pokémon atacou e causou {$danoJogador} de dano ";
+                $statusJogador = $this->sortearNovoStatus(
+                    $statusJogador,
+                    $tipoAtqOpo,
+                    $pkOpo['tipo1'] ?? 'Normal',
+                    $nomeJog,
+                    $logTurno
+                );
             }
+        };
+
+        if ($jogadorAtacaPrimeiro) {
+            $executarAtaqueJogador();
+            if ($hpOpoAtual > 0) {
+                $executarAtaqueOponente();
+            }
+        } else {
+            $executarAtaqueOponente();
+            if ($hpJogAtual > 0) {
+                $executarAtaqueJogador();
+            }
+        }
+
+        if ($hpJogAtual > 0) {
+            $danoStatusJog = $this->calcularDanoResidualStatus($statusJogador, $hpJogMax, $nomeJog, $logTurno);
+            $hpJogAtual = max(0, $hpJogAtual - $danoStatusJog);
+        }
+
+        if ($hpOpoAtual > 0) {
+            $danoStatusOpo = $this->calcularDanoResidualStatus($statusOponente, $hpOpoMax, $nomeOpo, $logTurno);
+            $hpOpoAtual = max(0, $hpOpoAtual - $danoStatusOpo);
         }
 
         $_SESSION['turno_batalha'] = ($_SESSION['turno_batalha'] ?? 0) + 1;
         $numeroTurno = $_SESSION['turno_batalha'];
 
-        // mantém o hp q o pokémon tinha no final da batalha no banco de dados
         if ($idSlotAtivo) {
             try {
-                $hpParaSalvar = max(0, $hpJogAtual);
-                $stmtSlot = $this->db->prepare("UPDATE slot SET hp = ? WHERE idSlot = ? AND idUsuario = ?");
-                $stmtSlot->execute([$hpParaSalvar, $idSlotAtivo, $_SESSION['idUsuario']]);
+                $stmtSlot = $this->db->prepare("UPDATE slot SET hp = ?, status = ? WHERE idSlot = ? AND idUsuario = ?");
+                $stmtSlot->execute([$hpJogAtual, $statusJogador, $idSlotAtivo, $_SESSION['idUsuario']]);
             } catch (PDOException $e) {
-                error_log("Erro ao persistir HP do slot: " . $e->getMessage());
+                error_log("Erro ao persistir HP/Status do slot: " . $e->getMessage());
             }
         }
 
@@ -271,14 +451,14 @@ class BatalhaController {
         if ($vitoria) {
             $stmt = $this->db->prepare("UPDATE usuario SET dinheiro = dinheiro + 1500, wins = wins + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
-            $logTurno .= " você derrotou o pokémon adversário e ganhou 1.500PkD$!";
+            $logTurno .= "Você derrotou o pokémon adversário e ganhou 1.500PkD$!";
             $this->CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("VITÓRIA", $pkJog, $pkOpo);
             unset($_SESSION['turno_batalha']);
         } elseif ($derrota) {
             $stmt = $this->db->prepare("UPDATE usuario SET loss = loss + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
-            $logTurno .= " seu pokémon desmaiou!";
+            $logTurno .= "Seu pokémon desmaiou!";
             $this->CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("DERROTA", $pkJog, $pkOpo);
             unset($_SESSION['turno_batalha']);
@@ -295,7 +475,100 @@ class BatalhaController {
             'statusOponente' => $statusOponente,
             'vitoria' => $vitoria,
             'derrota' => $derrota,
-            'mensagem' => $logTurno
+            'mensagem' => trim($logTurno)
+        ]);
+        exit;
+    }
+
+    public function usarItemBatalha() {
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['idUsuario'])) {
+            http_response_code(401);
+            echo json_encode(['sucesso' => false, 'mensagem' => 'Sessão expirada.']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $idSlot = isset($input['idSlot']) ? (int) $input['idSlot'] : 0;
+        $idItem = isset($input['idItem']) ? (int) $input['idItem'] : 0;
+        $idUsuario = (int) $_SESSION['idUsuario'];
+
+        if ($idSlot <= 0 || $idItem <= 0) {
+            echo json_encode(['sucesso' => false, 'mensagem' => 'Selecione um item válido.']);
+            exit;
+        }
+
+        $timeModel = new Time($this->db);
+        $inventarioModel = new Inventario($this->db);
+
+        $slot = $timeModel->buscarSlotDoUsuario($idSlot, $idUsuario);
+        $itemInv = $inventarioModel->listarPorUsuario2($idUsuario, $idItem);
+
+        if (!$slot || !$itemInv || intval($itemInv['quantidade'] ?? 0) <= 0) {
+            echo json_encode(['sucesso' => false, 'mensagem' => 'Item ou Pokémon inválido / sem estoque.']);
+            exit;
+        }
+
+        $hpAtual = intval($slot['hp']);
+        $hpMax = max(1, intval($slot['hpMax']));
+        if ($hpAtual <= 0) {
+            echo json_encode(['sucesso' => false, 'mensagem' => "{$slot['nome']} está desmaiado!"]);
+            exit;
+        }
+
+        $nomeItem = $itemInv['nome'];
+        $statusAtual = $this->normalizarStatus($slot['status'] ?? null);
+        $novoHp = $hpAtual;
+        $novoStatus = $statusAtual;
+
+        $mapaCura = [
+            'Antidote'      => ['envenenado'],
+            'Paralyze Heal' => ['paralisado'],
+            'Burn Heal'     => ['queimado'],
+            'Ice Heal'      => ['congelado'],
+            'Awakening'     => ['dormindo'],
+            'Full Heal'     => ['envenenado', 'paralisado', 'queimado', 'congelado', 'dormindo'],
+            'Full Restore'  => ['envenenado', 'paralisado', 'queimado', 'congelado', 'dormindo'],
+        ];
+
+        if (!isset($mapaCura[$nomeItem])) {
+            echo json_encode(['sucesso' => false, 'mensagem' => 'Esse item não pode ser usado para curar status aqui.']);
+            exit;
+        }
+
+        if ($nomeItem === 'Full Restore') {
+            $precisaCuraStatus = ($statusAtual !== null && in_array($statusAtual, $mapaCura[$nomeItem], true));
+            $precisaCuraHp = ($hpAtual < $hpMax);
+            if (!$precisaCuraStatus && !$precisaCuraHp) {
+                echo json_encode(['sucesso' => false, 'mensagem' => "{$slot['nome']} já está com HP cheio e sem status!"]);
+                exit;
+            }
+            $novoHp = $hpMax;
+            if ($precisaCuraStatus) {
+                $novoStatus = null;
+            }
+        } else {
+            if ($statusAtual === null || !in_array($statusAtual, $mapaCura[$nomeItem], true)) {
+                echo json_encode(['sucesso' => false, 'mensagem' => "{$nomeItem} não tem efeito no status atual de {$slot['nome']}."]);
+                exit;
+            }
+            $novoStatus = null;
+        }
+
+        $stmt = $this->db->prepare("UPDATE slot SET hp = ?, status = ? WHERE idSlot = ? AND idUsuario = ?");
+        $stmt->execute([$novoHp, $novoStatus, $idSlot, $idUsuario]);
+        $inventarioModel->consumirItem($idUsuario, $idItem);
+
+        $novaQuantidade = max(0, intval($itemInv['quantidade']) - 1);
+
+        echo json_encode([
+            'sucesso' => true,
+            'hpJogador' => $novoHp,
+            'statusJogador' => $novoStatus,
+            'idItem' => $idItem,
+            'quantidadeRestante' => $novaQuantidade,
+            'mensagem' => "{$nomeItem} usado em {$slot['nome']}!"
         ]);
         exit;
     }

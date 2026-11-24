@@ -80,6 +80,10 @@ try {
         case 'processar_turno':
         $batalhaController->processarTurno(); // processa o turno, faz os calculos
         break;
+
+        case 'usar_item_batalha':
+        $batalhaController->usarItemBatalha(); // usa item de curar status durante a batalha
+        break;
         
         case 'mudar_perfil':
         $authController->telaMudarPerfil(); // Abre a página mudarPerfil.php

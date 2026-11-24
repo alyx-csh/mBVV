@@ -47,11 +47,11 @@
     <div class="arena-container">
         <h1>Tá na hora do Vamo Ve!</h1>
 
-        <?php 
+        <?php
             $inventario = $itensUsuario ?? [];
             $itensDeStatus = ['Antidote', 'Paralyze Heal', 'Burn Heal', 'Ice Heal', 'Awakening', 'Full Heal', 'Full Restore'];
             $pokemons = $timeAtual['pokemons'] ?? [];
-            $ativoIndex = 0; 
+            $ativoIndex = 0;
             $pokemonAtivo = $pokemons[$ativoIndex] ?? null;
         ?>
 
@@ -70,9 +70,9 @@
 
             <h2>VS</h2>
 
-            <!-- Jogador Ativo (Carrega o HP atual vindo do banco no slot) -->
+            <!-- Jogador Ativo (Carrega o HP e Status atuais vindos do banco no slot) -->
             <div class="combatente">
-                <h3 id="nome-pk-ativo"><?php echo htmlspecialchars($pokemonAtivo['nome']); ?> </h3>
+                <h3 id="nome-pk-ativo"><?php echo htmlspecialchars($pokemonAtivo['nome']); ?></h3>
                 <p>HP: <span id="hp-jog-atual"><?php echo $pokemonAtivo['hp']; ?></span> / <span id="hp-jog-max"><?php echo $pokemonAtivo['hpMax']; ?></span></p>
                 <p>Status: <span id="status-jogador"><?php echo htmlspecialchars($pokemonAtivo['status'] ?: 'Saudável'); ?></span></p>
                 <img id="img-pk-ativo" src="<?php echo $pokemonAtivo['img']; ?>" alt="Jogador">
@@ -82,10 +82,10 @@
         <div class="painel-controle">
             <p id="log-batalha">ataque ou troque de pokémon</p>
             <div class="botoes-ataque">
-                <button id="btn-ataque1" onclick="executarAto('ataque1', '<?php echo htmlspecialchars($pokemonAtivo['ataque1']); ?>')">
+                <button id="btn-ataque1" onclick="executarAto('ataque1', '<?php echo htmlspecialchars($pokemonAtivo['ataque1'], ENT_QUOTES, 'UTF-8'); ?>')">
                     <?php echo htmlspecialchars($pokemonAtivo['ataque1']); ?> <br>
                 </button>
-                <button id="btn-ataque2" onclick="executarAto('ataque2', '<?php echo htmlspecialchars($pokemonAtivo['ataque2']); ?>')">
+                <button id="btn-ataque2" onclick="executarAto('ataque2', '<?php echo htmlspecialchars($pokemonAtivo['ataque2'], ENT_QUOTES, 'UTF-8'); ?>')">
                     <?php echo htmlspecialchars($pokemonAtivo['ataque2']); ?> <br>
                 </button>
             </div>
@@ -95,9 +95,9 @@
                 <select id="item-batalha">
                     <option value="">Selecione um item de status</option>
                     <?php foreach ($inventario as $item): ?>
-                        <?php if (in_array($item['nome'], $itensDeStatus)): ?>
+                        <?php if (in_array($item['nome'], $itensDeStatus) && intval($item['quantidade'] ?? 0) > 0): ?>
                             <option value="<?php echo $item['idItem']; ?>">
-                                <?php echo htmlspecialchars($item['nome']); ?> (x<?php echo $item['quantidade']; ?>)
+                                <?php echo htmlspecialchars($item['nome']); ?> (x<?php echo intval($item['quantidade']); ?>)
                             </option>
                         <?php endif; ?>
                     <?php endforeach; ?>
@@ -134,11 +134,9 @@
         </div>
 
         <?php endif; ?>
-
     </div>
 
     <script>
-        // pegando em js o idSlot atualizar o hp no banco
         let pokemonAtivo = {
             idTimes: <?php echo json_encode($timeAtual['idTimes'] ?? null); ?>,
             idSlot: <?php echo json_encode($pokemonAtivo['idSlot'] ?? 0); ?>,
@@ -151,7 +149,7 @@
             status: <?php echo json_encode($pokemonAtivo['status'] ?? null); ?>,
             tipo1: <?php echo json_encode($pokemonAtivo['tipo1'] ?? 'Normal'); ?>
         };
-        // mesma coisa mas pro oponente
+
         let oponente = {
             nome: <?php echo json_encode($oponente['nome']); ?>,
             atk: <?php echo $oponente['atk']; ?>,
@@ -162,9 +160,25 @@
             status: null,
             tipo1: <?php echo json_encode($oponente['tipo1']); ?>
         };
-        //função assincrona para o ataque dar dano
-        async function executarAto(tipoAtaque, nomeAtaque) {
 
+        function statusLegivel(status) {
+            if (!status || status === 'null') return 'Saudável';
+            return status;
+        }
+
+        function sincronizarBotaoTrocaAtivo() {
+            const botaoTrocaAtivo = document.getElementById(`troca-${pokemonAtivo.idSlot}`);
+            if (botaoTrocaAtivo) {
+                botaoTrocaAtivo.dataset.hp = pokemonAtivo.hp;
+                botaoTrocaAtivo.dataset.status = pokemonAtivo.status || '';
+                botaoTrocaAtivo.textContent = `${pokemonAtivo.nome} (HP: ${pokemonAtivo.hp})`;
+                if (pokemonAtivo.hp <= 0) {
+                    botaoTrocaAtivo.disabled = true;
+                }
+            }
+        }
+
+        async function executarAto(tipoAtaque, nomeAtaque) {
             try {
                 const resposta = await fetch('index.php?action=processar_turno', {
                     method: 'POST',
@@ -184,19 +198,17 @@
 
                 document.getElementById('hp-opo-atual').innerText = data.hpOponente;
                 document.getElementById('hp-jog-atual').innerText = data.hpJogador;
-                
+
                 oponente.hp = data.hpOponente;
                 pokemonAtivo.hp = data.hpJogador;
                 oponente.status = data.statusOponente;
                 pokemonAtivo.status = data.statusJogador;
+
                 document.getElementById('status-oponente').innerText = statusLegivel(oponente.status);
                 document.getElementById('status-jogador').innerText = statusLegivel(pokemonAtivo.status);
+                sincronizarBotaoTrocaAtivo();
 
                 document.getElementById('log-batalha').innerText = data.mensagem;
-                if (pokemonAtivo.hp <= 0) {
-                    document.getElementById('log-batalha').innerText = "pokémon desmaiado e incapaz de lutar!";
-                    return;
-                }
 
                 if (data.derrota || pokemonAtivo.hp <= 0) {
                     desativarBotoesAtaque();
@@ -210,16 +222,59 @@
                     document.getElementById('log-batalha').innerHTML += "<br><strong>Você ganhou, redirecionando à tela inicial...</strong>";
                     setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
                 }
-
             } catch (erro) {
                 console.error("Falha:", erro);
                 document.getElementById('log-batalha').innerText = "Ocorreu um erro de conexão ao processar o turno.";
             }
         }
 
-        function statusLegivel(status) {
-            if (!status || status === 'null') return 'Saudável';
-            return status;
+        async function usarItemBatalha() {
+            const select = document.getElementById('item-batalha');
+            const idItem = select ? select.value : '';
+
+            if (!idItem) {
+                document.getElementById('log-batalha').innerText = "Selecione um item antes de usar.";
+                return;
+            }
+
+            try {
+                const resposta = await fetch('index.php?action=usar_item_batalha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idSlot: pokemonAtivo.idSlot,
+                        idItem: parseInt(idItem, 10)
+                    })
+                });
+
+                const data = await resposta.json();
+                document.getElementById('log-batalha').innerText = data.mensagem || "Ação concluída.";
+
+                if (!data.sucesso) {
+                    return;
+                }
+
+                pokemonAtivo.hp = data.hpJogador;
+                pokemonAtivo.status = data.statusJogador;
+
+                document.getElementById('hp-jog-atual').innerText = pokemonAtivo.hp;
+                document.getElementById('status-jogador').innerText = statusLegivel(pokemonAtivo.status);
+                sincronizarBotaoTrocaAtivo();
+
+                const opcaoSelecionada = select.querySelector(`option[value="${data.idItem}"]`);
+                if (opcaoSelecionada) {
+                    const nomeBase = opcaoSelecionada.textContent.replace(/\s*\(x\d+\)$/, '');
+                    if (data.quantidadeRestante <= 0) {
+                        opcaoSelecionada.remove();
+                        select.value = '';
+                    } else {
+                        opcaoSelecionada.textContent = `${nomeBase} (x${data.quantidadeRestante})`;
+                    }
+                }
+            } catch (erro) {
+                console.error("Erro ao usar item na batalha:", erro);
+                document.getElementById('log-batalha').innerText = "Erro de conexão ao usar o item.";
+            }
         }
 
         function trocarPokemon(botao) {
@@ -252,12 +307,12 @@
             const btn2 = document.getElementById('btn-ataque2');
 
             btn1.innerText = d.ataque1;
-            btn1.setAttribute("onclick", `executarAto('ataque1', '${d.ataque1}')`);
+            btn1.setAttribute("onclick", `executarAto('ataque1', '${d.ataque1.replace(/'/g, "\\'")}')`);
 
             btn2.innerText = d.ataque2;
-            btn2.setAttribute("onclick", `executarAto('ataque2', '${d.ataque2}')`);
+            btn2.setAttribute("onclick", `executarAto('ataque2', '${d.ataque2.replace(/'/g, "\\'")}')`);
         }
-        //desativa os botões de ataque para quando o pokémon morre
+
         function desativarBotoesAtaque() {
             const botoes = document.querySelectorAll('.botoes-ataque button, .btn-troca');
             botoes.forEach(btn => btn.disabled = true);
