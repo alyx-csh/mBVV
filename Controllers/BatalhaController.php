@@ -90,6 +90,7 @@ class BatalhaController {
             $itensUsuario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
             $oponente = $this->gerarOponenteAleatorio();
 
+            $_SESSION['turno_batalha'] = 0; //reiniciar contador de turno
             require_once __DIR__ . '/../View/batalha/arena.php';
 
         } catch (SemPokVivoException $e) {
@@ -132,7 +133,7 @@ class BatalhaController {
     }
 
     private function gerarOponenteAleatorio() { //vai na API e pega um pokémon para batalhar contigo, podendo ser modificado via rand, dando a opção de limitar a alguma geração
-        $idAleatorio = rand(1, 151);
+        $idAleatorio = rand(1, 1025);
         $dadosApi = PokeApiService::buscarPokemonDaApi($idAleatorio);
 
         if (!$dadosApi) {
@@ -250,6 +251,9 @@ class BatalhaController {
             }
         }
 
+        $_SESSION['turno_batalha'] = ($_SESSION['turno_batalha'] ?? 0) + 1;
+        $numeroTurno = $_SESSION['turno_batalha'];
+
         // mantém o hp q o pokémon tinha no final da batalha no banco de dados
         if ($idSlotAtivo) {
             try {
@@ -268,16 +272,18 @@ class BatalhaController {
             $stmt = $this->db->prepare("UPDATE usuario SET dinheiro = dinheiro + 500, wins = wins + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " você derrotou o pokémon adversário e ganhou 500PkD$!";
-            $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
+            $this->CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("VITÓRIA", $pkJog, $pkOpo);
+            unset($_SESSION['turno_batalha']);
         } elseif ($derrota) {
             $stmt = $this->db->prepare("UPDATE usuario SET loss = loss + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
             $logTurno .= " seu pokémon desmaiou!";
-            $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
+            $this->CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("DERROTA", $pkJog, $pkOpo);
+            unset($_SESSION['turno_batalha']);
         } else {
-            $this->CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
+            $this->CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
         }
 
         echo json_encode([
@@ -295,30 +301,49 @@ class BatalhaController {
     }
 
     public function CriarLogBatalha($resultadoBatalha, $pkJog, $pkOpo) {
-
         $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
-        $nomeUsuario = $_SESSION['nomeUsuario'];
+        if (!is_dir($diretorioLog)) {
+            mkdir($diretorioLog, 0777, true);
+        }
+
+        $nomeUsuario = $_SESSION['nomeUsuario'] ?? 'Jogador';
+        $nomeJogadorPk = $pkJog['nome'] ?? 'Pokémon';
+        $nomeOponentePk = $pkOpo['nome'] ?? 'Oponente';
+        $idTime = !empty($pkJog['idTimes']) ? (int)$pkJog['idTimes'] : null;
 
         $arquivoLog = $diretorioLog . 'logBatalha.txt';
-        $dataHora = date("Y-m-d H:i:s");
-        $entradaLog = "[$dataHora] - LOG DE BATALHA DE $nomeUsuario (UTILIZANDO {$pkJog['nome']}) = $resultadoBatalha CONTRA {$pkOpo['nome']} OPONENTE" . PHP_EOL;
+        $tz = new DateTimeZone('America/Sao_Paulo');
+        $dataHora = (new DateTime('now', $tz))->format('Y-m-d H:i:s');
+        $entradaLog = "[$dataHora] - LOG DE BATALHA DE $nomeUsuario UTILIZANDO {$nomeJogadorPk} = $resultadoBatalha CONTRA {$nomeOponentePk} OPONENTE" . PHP_EOL;
 
         file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
-        $stmt = $this->db->prepare("INSERT INTO logBatalha (idUser, pokeOp, idTime, textoLog) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$_SESSION['idUsuario'], $pkOpo['nome'], $pkJog['idTimes'], $entradaLog]);
+
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO logBatalha (idUser, pokeOp, idTime, resultado, textoLog)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $_SESSION['idUsuario'],
+                $nomeOponentePk,
+                $idTime,
+                $resultadoBatalha,
+                trim($entradaLog)
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao inserir logBatalha no banco: " . $e->getMessage());
+        }
     }
 
-    public function CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual) {
-
-        $nomeUsuario = $_SESSION['nomeUsuario'];
+    public function CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual) {
+        $nomeUsuario = $_SESSION['nomeUsuario'] ?? 'Jogador';
         $diretorioLog = __DIR__ . '/../logs/logs_batalha/';
 
         $arquivoLog = $diretorioLog . 'logBatalha.txt';
-        $dataHora = date("Y-m-d H:i:s");
-        $entradaLog = "[$dataHora] - $nomeUsuario CAUSOU " . $danoJogador . " DE DANO (VIDA ATUAL " . $hpJogAtual . ") - OPONENTE CAUSOU " . $danoOponente . " DE DANO (VIDA ATUAL " . $hpOpoAtual . ")" . PHP_EOL;
+        $tz = new DateTimeZone('America/Sao_Paulo');
+        $dataHora = (new DateTime('now', $tz))->format('Y-m-d H:i:s');
+        $entradaLog = "[$dataHora] - NO [TURNO {$numeroTurno}] $nomeUsuario CAUSOU " . $danoJogador . " DE DANO (VIDA ATUAL " . $hpJogAtual . ") - OPONENTE CAUSOU " . $danoOponente . " DE DANO (VIDA ATUAL " . $hpOpoAtual . ")" . PHP_EOL;
 
         file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
     }
-
-    
 }

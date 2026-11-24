@@ -140,17 +140,20 @@
     <script>
         // pegando em js o idSlot atualizar o hp no banco
         let pokemonAtivo = {
-            idSlot: <?php echo $pokemonAtivo['idSlot'] ?? 0; ?>,
-            atk: <?php echo $pokemonAtivo['atk'] ?? 100; ?>,
-            def: <?php echo $pokemonAtivo['def'] ?? 100; ?>,
-            spe: <?php echo $pokemonAtivo['spe'] ?? 100; ?>,
-            hp: <?php echo $pokemonAtivo['hp'] ?? 150; ?>,
-            hpMax: <?php echo $pokemonAtivo['hpMax'] ?? 150; ?>,
+            idTimes: <?php echo json_encode($timeAtual['idTimes'] ?? null); ?>,
+            idSlot: <?php echo json_encode($pokemonAtivo['idSlot'] ?? 0); ?>,
+            nome: <?php echo json_encode($pokemonAtivo['nome'] ?? 'Pokémon'); ?>,
+            atk: <?php echo json_encode($pokemonAtivo['atk'] ?? 100); ?>,
+            def: <?php echo json_encode($pokemonAtivo['def'] ?? 100); ?>,
+            spe: <?php echo json_encode($pokemonAtivo['spe'] ?? 100); ?>,
+            hp: <?php echo json_encode($pokemonAtivo['hp'] ?? 150); ?>,
+            hpMax: <?php echo json_encode($pokemonAtivo['hpMax'] ?? 150); ?>,
             status: <?php echo json_encode($pokemonAtivo['status'] ?? null); ?>,
             tipo1: <?php echo json_encode($pokemonAtivo['tipo1'] ?? 'Normal'); ?>
         };
         // mesma coisa mas pro oponente
         let oponente = {
+            nome: <?php echo json_encode($oponente['nome']); ?>,
             atk: <?php echo $oponente['atk']; ?>,
             def: <?php echo $oponente['def']; ?>,
             spe: <?php echo $oponente['spe']; ?>,
@@ -229,6 +232,7 @@
             }
 
             pokemonAtivo.idSlot = parseInt(d.idSlot, 10);
+            pokemonAtivo.nome = d.nome;
             pokemonAtivo.atk = parseInt(d.atk, 10);
             pokemonAtivo.def = parseInt(d.def, 10);
             pokemonAtivo.spe = parseInt(d.spe, 10);

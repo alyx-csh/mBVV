@@ -87,12 +87,14 @@ foreign key (idSlot6) references slot(idSlot),
 foreign key (idUsuario) references usuario(idUsuario)
 );
 
-CREATE TABLE logBatalha(
+create table logBatalha(
 idLog int auto_increment primary key,
-idUser int,
-pokeOp varchar(50),
+idUser int not null,
+pokeOp varchar(50) not null,
 idTime int,
-textoLog varchar(1000),
+resultado varchar(20),
+textoLog varchar(1000) not null,
+dataHora datetime default current_timestamp,
 foreign key (idUser) references usuario(idUsuario),
 foreign key (idTime) references times(idTimes)
 );
