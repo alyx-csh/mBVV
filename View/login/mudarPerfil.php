@@ -113,13 +113,29 @@
 
         a{
             text-align: center;
-            width: 70%; 
+            width: 60%; 
             padding: 12px;
             margin-top: 8px;
             border-radius: 1vh; 
             border: 3px double #3B4CCA;
             background-color: #ff0000;
             color: #FFFFFF;
+            font-weight: bold;
+            font-family: Helvetica;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        #menu{
+            text-align: center;
+            width: 50%; 
+            padding: 5px;
+            margin-top: 20px;
+            border-radius: 1vh; 
+            border: 3px double #3B4CCA;
+            background-color: #FFDE00;
+            color: #000;
             font-weight: bold;
             font-family: Helvetica;
             font-size: 1.1em;
@@ -145,7 +161,7 @@
 <body>
     <!-- div do formulário -->
     <div class="card-login"> 
-        <h1 id="titulo">Mude sua foto de perfil</h1>
+        <h1 id="titulo">Editar perfil</h1>
 
         <?php if(isset($_SESSION['erro_login'])): ?>
             <div class="erro">
@@ -160,9 +176,11 @@
                 <input type="file" name="foto" id="fotoinput" accept="image/*" required>
             </div>
 
-            <button type="submit" id="submit">Mudar</button>
+            <button type="submit" id="submit">Mudar foto de perfil</button>
             <br>
             <a href="index.php?action=logout" class="btn-logout">Sair do perfil</a>
+
+            <a id="menu" href="index.php?action=inicio" class="btn-voltarMenu">Voltar ao menu</a>
         </form>
     </div>
 </body>

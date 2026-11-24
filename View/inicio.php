@@ -7,8 +7,14 @@ if (!isset($_SESSION['idUsuario'])) {
 
 $usuarioModel = new Usuario($db);
 $usuario = $usuarioModel->buscarPorId($_SESSION['idUsuario']);
-$nome = $usuario['nome'];
-$fotoPerfil = $usuario['img'];
+if (!$usuario || !is_array($usuario)) {
+    unset($_SESSION['idUsuario'], $_SESSION['nomeUsuario']);
+    header("Location: index.php?action=login");
+    exit;
+}
+
+$nome = $usuario['nome'] ?? '';
+$fotoPerfil = $usuario['img'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

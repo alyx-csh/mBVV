@@ -8,10 +8,7 @@ class LoginController {
     }
 
     public function telaLogin() {
-        // Se já tá logado, manda pro início
-        $nome = $_POST['nome'] ?? '';
-        if (isset($_SESSION['idUsuario'])) {
-            $this->CriarLogUsuario($nome);
+        if (isset($_SESSION['idUsuario'])) { // Se já tá logado, manda pro início
             header("Location: index.php?action=inicio");
             exit;
         }
