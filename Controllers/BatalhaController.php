@@ -1,8 +1,6 @@
 <?php
 class BatalhaController {
     private $db;
-
-
     public function __construct($db) {
         $this->db = $db;
     }
@@ -33,7 +31,7 @@ class BatalhaController {
 
         } catch (SemTimeException $e) { // exception para caso o usuário não tenha time, botar ele direto na página de carregar time
             $_SESSION['erro_time'] = $e->getMessage();
-            header("Location: index.php?action=montar_time");
+            header("Location: index.php?action=novo_time");
             exit;
         } catch (Exception $e) { // exception pra caso os times não carreguem
             $_SESSION['erro_batalha'] = "Erro ao carregar times: " . $e->getMessage();
@@ -273,7 +271,7 @@ class BatalhaController {
 
         file_put_contents($arquivoLog, $entradaLog, FILE_APPEND);
         $stmt = $this->db->prepare("INSERT INTO logBatalha (idUser, pokeOp, idTime, textoLog) VALUES (?, ?, ?, ?)");
-        $ $stmt->execute([$_SESSION['idUsuario'], $pkOpo['nome'], $pkJog['idTimes'], $entradaLog]);
+        $stmt->execute([$_SESSION['idUsuario'], $pkOpo['nome'], $pkJog['idTimes'], $entradaLog]);
     }
 
     public function CriarLogTurno($danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual) {

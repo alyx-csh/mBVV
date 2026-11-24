@@ -145,7 +145,7 @@
 <body>
     <!-- div do formulário -->
     <div class="card-login"> 
-        <h1 id="titulo">MonstroBolso VamoVe!</h1>
+        <h1 id="titulo">Mude sua foto de perfil</h1>
 
         <?php if(isset($_SESSION['erro_login'])): ?>
             <div class="erro">
