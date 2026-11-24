@@ -218,6 +218,13 @@
             </div>
         <?php endif; ?>
 
+        <?php if(isset($_SESSION['erro_vida'])): ?>
+            <div class="alerta-erro">
+                <?php echo $_SESSION['erro_vida'];
+                unset($_SESSION['erro_vida']); ?>
+            </div>
+        <?php endif; ?>
+
         <?php 
             $contador = 1; 
             foreach ($itens as $row):

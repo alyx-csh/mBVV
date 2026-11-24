@@ -5,8 +5,8 @@ class BatalhaController {
         $this->db = $db;
     }
 
-    public function index() { //se usuário não estiver logado, é levado pro login
-        if (!isset($_SESSION['idUsuario'])) {
+    public function index() { 
+        if (!isset($_SESSION['idUsuario'])) { //se usuário não estiver logado, é levado pro login
             header("Location: index.php?action=login");
             exit;
         }
@@ -20,6 +20,8 @@ class BatalhaController {
             }
 
             $timesCompletos = [];
+            $temPokemonVivo = false;
+
             foreach ($timesBrutos as $t) {
                 $detalhes = $this->buscarDetalhesTime($t['idTimes']);
                 if (!empty($detalhes)) {
@@ -27,42 +29,74 @@ class BatalhaController {
                 }
             }
 
+            foreach ($detalhes['pokemons'] as $pokemon) {
+                if (isset($pokemon['hp']) && $pokemon['hp'] > 0) {
+                    $temPokemonVivo = true;
+                    break;
+                }
+            }
+
+            if (!$temPokemonVivo) {
+                throw new SemPokVivoException("Time incapaz de lutar, compre poções para restaurar a vida de ao menos um membro");
+            }
             require_once __DIR__ . '/../View/batalha/selecionarTime.php';
 
         } catch (SemTimeException $e) { // exception para caso o usuário não tenha time, botar ele direto na página de carregar time
             $_SESSION['erro_time'] = $e->getMessage();
             header("Location: index.php?action=novo_time");
             exit;
+        } catch (SemPokVivoException $e) { //exception para caso o usuário tenha time, porém os pokémons estejam mortos
+            $_SESSION['erro_vida'] = $e->getMessage();
+            header("Location: index.php?action=loja");
+            exit; 
         } catch (Exception $e) { // exception pra caso os times não carreguem
             $_SESSION['erro_batalha'] = "Erro ao carregar times: " . $e->getMessage();
             header("Location: index.php?action=inicio");
             exit;
-        }
+        } 
+        
     }
 
     public function arena() {
         if (!isset($_SESSION['idUsuario'])) {
             header("Location: index.php?action=login");
             exit;
-        } //caso usuário não esteja logado leva ele pra login
-
-        $idTimeSelecionado = $_GET['idTime'] ?? null; //cria a variável para permitir a seleção de diferentes times
-
-        if (!$idTimeSelecionado) {
-            header("Location: index.php?action=batalha");
-            exit; //ao selecionar o time leva ele pra batalha
         }
 
-        $timeAtual = $this->buscarDetalhesTime($idTimeSelecionado);
+        try {
+            $idTimeSelecionado = $_GET['idTime'] ?? null;
+            if (!$idTimeSelecionado) {
+                header("Location: index.php?action=batalha");
+                exit;
+            }
+            $timeAtual = $this->buscarDetalhesTime($idTimeSelecionado);
+            if (empty($timeAtual) || $timeAtual['idUsuario'] != $_SESSION['idUsuario']) {
+                header("Location: index.php?action=batalha");
+                exit;
+            }
 
-        if (empty($timeAtual) || $timeAtual['idUsuario'] != $_SESSION['idUsuario']) {
-            header("Location: index.php?action=batalha");
+            $temPokemonVivo = false;
+            foreach ($timeAtual['pokemons'] as $pokemon) {
+                if (isset($pokemon['hp']) && $pokemon['hp'] > 0) {
+                    $temPokemonVivo = true;
+                    break;
+                }
+            }
+            if (!$temPokemonVivo) {
+                throw new SemPokVivoException("Time incapaz de lutar, compre poções para restaurar a vida de ao menos um membro");
+            }
+
+            $inventarioModel = new Inventario($this->db);
+            $itensUsuario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
+            $oponente = $this->gerarOponenteAleatorio();
+
+            require_once __DIR__ . '/../View/batalha/arena.php';
+
+        } catch (SemPokVivoException $e) {
+            $_SESSION['erro_vida'] = $e->getMessage();
+            header("Location: index.php?action=loja");
             exit;
         }
-        $inventarioModel = new Inventario($this->db);
-        $itensUsuario = $inventarioModel->listarPorUsuario($_SESSION['idUsuario']);
-        $oponente = $this->gerarOponenteAleatorio();
-        require_once __DIR__ . '/../View/batalha/arena.php';
     }
 
     private function buscarDetalhesTime($idTimes) { //função pra pegar os detalhes do time, quem tá nele assim como seu HP
@@ -216,7 +250,7 @@ class BatalhaController {
             }
         }
 
-        // PERSISTIR O HP ATUAL NA TABELA SLOT A CADA TURNO
+        // mantém o hp q o pokémon tinha no final da batalha no banco de dados
         if ($idSlotAtivo) {
             try {
                 $hpParaSalvar = max(0, $hpJogAtual);
