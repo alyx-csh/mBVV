@@ -161,10 +161,6 @@
         };
         //função assincrona para o ataque dar dano
         async function executarAto(tipoAtaque, nomeAtaque) {
-            if (pokemonAtivo.hp <= 0) {
-                document.getElementById('log-batalha').innerText = "pokémon desmaiado e incapaz de lutar!";
-                return;
-            }
 
             try {
                 const resposta = await fetch('index.php?action=processar_turno', {
@@ -194,10 +190,13 @@
                 document.getElementById('status-jogador').innerText = statusLegivel(pokemonAtivo.status);
 
                 document.getElementById('log-batalha').innerText = data.mensagem;
+                if (pokemonAtivo.hp <= 0) {
+                    document.getElementById('log-batalha').innerText = "pokémon desmaiado e incapaz de lutar!";
+                    return;
+                }
 
                 if (data.derrota || pokemonAtivo.hp <= 0) {
                     desativarBotoesAtaque();
-                    // Correção da atribuição de HTML no log
                     document.getElementById('log-batalha').innerHTML += "<br><strong>Pokémon desmaiou, redirecionando à tela inicial...</strong>";
                     setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
                     return;

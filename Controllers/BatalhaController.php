@@ -26,18 +26,18 @@ class BatalhaController {
                 $detalhes = $this->buscarDetalhesTime($t['idTimes']);
                 if (!empty($detalhes)) {
                     $timesCompletos[] = $detalhes;
-                }
-            }
 
-            foreach ($detalhes['pokemons'] as $pokemon) {
-                if (isset($pokemon['hp']) && $pokemon['hp'] > 0) {
-                    $temPokemonVivo = true;
-                    break;
+                    foreach ($detalhes['pokemons'] as $pokemon) {
+                        if (isset($pokemon['hp']) && $pokemon['hp'] > 0) {
+                            $temPokemonVivo = true;
+                            break;
+                        }
+                    }
                 }
             }
 
             if (!$temPokemonVivo) {
-                throw new SemPokVivoException("Time incapaz de lutar, compre poções para restaurar a vida de ao menos um membro");
+                throw new SemPokVivoException("Time incapaz de lutar, compre revive(s) para lutar com este time");
             }
             require_once __DIR__ . '/../View/batalha/selecionarTime.php';
 
@@ -77,13 +77,13 @@ class BatalhaController {
 
             $temPokemonVivo = false;
             foreach ($timeAtual['pokemons'] as $pokemon) {
-                if (isset($pokemon['hp']) && $pokemon['hp'] > 0) {
+                if (isset($pokemon['hp']) && (int)$pokemon['hp'] > 0) {
                     $temPokemonVivo = true;
                     break;
                 }
             }
             if (!$temPokemonVivo) {
-                throw new SemPokVivoException("Time incapaz de lutar, compre poções para restaurar a vida de ao menos um membro");
+                throw new SemPokVivoException("Time escolhido incapaz de lutar, compre revive(s)");
             }
 
             $inventarioModel = new Inventario($this->db);
