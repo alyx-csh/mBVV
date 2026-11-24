@@ -269,9 +269,9 @@ class BatalhaController {
         $derrota = ($hpJogAtual <= 0);
 
         if ($vitoria) {
-            $stmt = $this->db->prepare("UPDATE usuario SET dinheiro = dinheiro + 500, wins = wins + 1 WHERE idUsuario = ?");
+            $stmt = $this->db->prepare("UPDATE usuario SET dinheiro = dinheiro + 1500, wins = wins + 1 WHERE idUsuario = ?");
             $stmt->execute([$_SESSION['idUsuario']]);
-            $logTurno .= " você derrotou o pokémon adversário e ganhou 500PkD$!";
+            $logTurno .= " você derrotou o pokémon adversário e ganhou 1.500PkD$!";
             $this->CriarLogTurno($numeroTurno, $danoJogador, $danoOponente, $hpJogAtual, $hpOpoAtual);
             $this->CriarLogBatalha("VITÓRIA", $pkJog, $pkOpo);
             unset($_SESSION['turno_batalha']);
