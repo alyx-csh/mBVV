@@ -88,7 +88,7 @@ class LoginController {
                 header("Location: index.php?action=inicio");
                 exit;
             } else {
-                $_SESSION['erro_login'] = "Senha incorreta para este usuário!";
+                $_SESSION['erro_login'] = "Senha ou usuário incorretos, tente novamente";
                 header("Location: index.php?action=login");
                 exit;
             }
