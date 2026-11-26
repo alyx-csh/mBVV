@@ -1,9 +1,4 @@
 <?php
-
-require_once "Models/Usuario.php";
-require_once "Models/Item.php";
-require_once "Models/Inventario.php";
-
 class LojinhaController
 {
     private $db;
