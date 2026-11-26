@@ -213,14 +213,14 @@
                 if (data.derrota || pokemonAtivo.hp <= 0) {
                     desativarBotoesAtaque();
                     document.getElementById('log-batalha').innerHTML += "<br><strong>Pokémon desmaiou, redirecionando à tela inicial...</strong>";
-                    setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
+                    setTimeout(() => window.location.href = 'index.php?action=inicio', 6700);
                     return;
                 }
 
                 if (data.vitoria) {
                     desativarBotoesAtaque();
                     document.getElementById('log-batalha').innerHTML += "<br><strong>Você ganhou, redirecionando à tela inicial...</strong>";
-                    setTimeout(() => window.location.href = 'index.php?action=inicio', 4000);
+                    setTimeout(() => window.location.href = 'index.php?action=inicio', 6700);
                 }
             } catch (erro) {
                 console.error("Falha:", erro);
