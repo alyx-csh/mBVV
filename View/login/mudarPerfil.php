@@ -123,6 +123,7 @@
             font-weight: bold;
             font-family: Helvetica;
             font-size: 1.1em;
+            text-decoration: none;
             cursor: pointer;
             transition: transform 0.1s, background-color 0.2s;
         }
