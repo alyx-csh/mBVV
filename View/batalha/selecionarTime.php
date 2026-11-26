@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Selecionar Time - MonstroBolso</title>
+    <title>Selecionar Time</title>
     <style>
         body {
             background-image: url("imagens/menuBatalha.png");

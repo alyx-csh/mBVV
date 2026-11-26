@@ -21,7 +21,7 @@ $fotoPerfil = $usuario['img'] ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu MonstroBolso VavoVê</title>
+    <title>Menu início MonstroBolso VavoVê</title>
     <style>
         @font-face {
             font-family: Pokemon;
@@ -152,10 +152,10 @@ $fotoPerfil = $usuario['img'] ?? null;
         <a href="index.php?action=loja" class="btn-opcao">Lojinha</a>
 
         <!-- leva pra batalha -->
-        <a href="index.php?action=batalha" class="btn-opcao">Batalhar</a>
+        <a href="index.php?action=batalha" class="btn-opcao">Batalhar!</a>
 
         <!-- montar -->
-        <a href="index.php?action=montar_time" class="btn-opcao">Montar time</a>
+        <a href="index.php?action=montar_time" class="btn-opcao">Montar e genrenciar time(s)</a>
     </div>
 
     <div class="troca-login">
@@ -164,7 +164,7 @@ $fotoPerfil = $usuario['img'] ?? null;
         <?php endif; ?>
         <div class="info-login">
             <p class="nome-login"><?php echo htmlspecialchars($nome); ?></p>
-            <a href="index.php?action=mudar_perfil" class="btn-logout">Mudar perfil</a>
+            <a href="index.php?action=mudar_perfil" class="btn-logout">Editar perfil</a>
         </div>
     </div>
 
