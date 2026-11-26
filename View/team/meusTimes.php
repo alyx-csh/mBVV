@@ -178,7 +178,7 @@
         <?php else: ?>
             <?php foreach ($times as $time): ?>
                 <div class="bloco-time">
-                    <h2>Equipe: <?php echo htmlspecialchars($time['nome']); ?></h2>
+                    <h2>Time: <?php echo htmlspecialchars($time['nome']); ?></h2>
 
                     <div class="grid-pokemons">
                         <?php foreach ($time['pokemons'] as $pk): 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Montar Equipa de Pokémon</title>
+    <title>Monte seu time</title>
     <style>
         @font-face {
             font-family: Pokemon;
@@ -142,7 +142,7 @@
         <?php endif; ?>
 
         <form action="index.php?action=salvar_time" method="POST">
-            <label>Nome da Equipe:</label>
+            <label>Nome do time:</label>
             <input type="text" name="nomeTime" placeholder="Pudim" required>
 
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
@@ -155,7 +155,7 @@
             <input type="text" name="pokemons[]" placeholder="Gengar">
             <input type="text" name="pokemons[]" placeholder="Lucario">
 
-            <button type="submit" class="btn-salvar">Guardar equipe</button>
+            <button type="submit" class="btn-salvar">Salvar time</button>
         </form>
         
         <a href="index.php?action=inicio" class="link-voltar">Voltar ao Início</a>

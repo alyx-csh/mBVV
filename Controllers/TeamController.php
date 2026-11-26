@@ -55,7 +55,7 @@ class TeamController {
     $idUsuarioLogado = $_SESSION['idUsuario'];
     $timeModel->criarTimeComSlots($idUsuarioLogado, $nomeTime, $slotsIds);
     
-    $_SESSION['sucesso_time'] = "Equipa montada e guardada com sucesso! (Pokémon inválidos foram ignorados).";
+    $_SESSION['sucesso_time'] = "Time guardado com sucesso! (Pokémon inválidos foram ignorados)";
     header("Location: index.php?action=montar_time");
     exit;
     }
